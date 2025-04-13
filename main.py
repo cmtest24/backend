@@ -1,6 +1,5 @@
 import os
 import sys
-import requests
 import subprocess
 import logging
 from flask import Flask, request, jsonify, redirect
@@ -16,26 +15,45 @@ def start_nest_server():
     logger.info("Starting NestJS backend server...")
     
     try:
-        # Check if node and nest-entrypoint.js exist
-        if not os.path.exists('nest-entrypoint.js'):
-            logger.error("nest-entrypoint.js does not exist")
-            
-        # Check if NestJS is installed
-        logger.debug("Checking installed packages")
-        npm_list = subprocess.run(['npm', 'list'], capture_output=True, text=True)
-        logger.debug(f"Installed packages: {npm_list.stdout}")
+        # Create a simple startup script for NestJS
+        with open('start-nest.js', 'w') as f:
+            f.write('''
+const { spawn } = require('child_process');
+const process = require('process');
+
+console.log('Starting NestJS application...');
+
+// Run the application with appropriate transpilation
+const nestProcess = spawn('npx', ['ts-node', 'src/main.ts'], {
+  stdio: 'inherit',
+  shell: true
+});
+
+nestProcess.on('error', (error) => {
+  console.error('Failed to start NestJS process:', error);
+});
+
+// Handle process termination
+process.on('SIGINT', () => {
+  console.log('Stopping NestJS application...');
+  nestProcess.kill();
+  process.exit();
+});
+''')
         
-        # Start NestJS using node directly
+        # Start NestJS using node
         nestjs_env = os.environ.copy()
-        # Ensure environment variables from Replit are passed to NestJS
         logger.debug("Environment variables passed to NestJS:")
         for key in ['PGHOST', 'DATABASE_URL', 'PGPASSWORD', 'PGUSER', 'PGPORT', 'PGDATABASE']:
             if key in nestjs_env:
                 logger.debug(f"  {key}: [secret]")
         
-        logger.debug("Starting NestJS with node nest-entrypoint.js")
+        # Set PORT environment variable for NestJS
+        nestjs_env['PORT'] = '8000'
+        
+        logger.debug("Starting NestJS via Node.js")
         process = subprocess.Popen(
-            ['node', 'nest-entrypoint.js'], 
+            ['node', 'start-nest.js'], 
             env=nestjs_env,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -98,6 +116,7 @@ def proxy_api(path):
         logger.debug(f"Proxying request to: {url}")
         
         # Forward all headers
+        import requests
         headers = {key: value for key, value in request.headers if key != 'Host'}
         
         # Forward the request with the same method, headers, and body
