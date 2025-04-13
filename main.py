@@ -2,6 +2,7 @@ import os
 import sys
 import subprocess
 import logging
+import time
 from flask import Flask, request, jsonify, redirect
 
 # Configure logging
@@ -15,41 +16,15 @@ def start_nest_server():
     logger.info("Starting NestJS backend server...")
     
     try:
-        # Create a simple startup script for NestJS
-        with open('start-nest.js', 'w') as f:
-            f.write('''
-const { spawn } = require('child_process');
-const process = require('process');
-
-console.log('Starting NestJS application...');
-
-// Run the application with appropriate transpilation
-const nestProcess = spawn('npx', ['ts-node', 'src/main.ts'], {
-  stdio: 'inherit',
-  shell: true
-});
-
-nestProcess.on('error', (error) => {
-  console.error('Failed to start NestJS process:', error);
-});
-
-// Handle process termination
-process.on('SIGINT', () => {
-  console.log('Stopping NestJS application...');
-  nestProcess.kill();
-  process.exit();
-});
-''')
-        
-        # Start NestJS using node
+        # Set PORT environment variable for NestJS
         nestjs_env = os.environ.copy()
-        logger.debug("Environment variables passed to NestJS:")
+        nestjs_env['PORT'] = '8000'
+        
+        # Log database environment variables (not their values)
+        logger.debug("Database environment variables passed to NestJS:")
         for key in ['PGHOST', 'DATABASE_URL', 'PGPASSWORD', 'PGUSER', 'PGPORT', 'PGDATABASE']:
             if key in nestjs_env:
                 logger.debug(f"  {key}: [secret]")
-        
-        # Set PORT environment variable for NestJS
-        nestjs_env['PORT'] = '8000'
         
         logger.debug("Starting NestJS via Node.js")
         process = subprocess.Popen(
@@ -61,7 +36,7 @@ process.on('SIGINT', () => {
         )
         logger.info(f"Started NestJS server with PID {process.pid}")
         
-        # Create a better logging function
+        # Create a logging function that runs in a separate thread
         import threading
         def log_output():
             while process.poll() is None:  # While process is running
@@ -87,6 +62,10 @@ process.on('SIGINT', () => {
         log_thread = threading.Thread(target=log_output)
         log_thread.daemon = True
         log_thread.start()
+        
+        # Wait a bit for NestJS to start
+        logger.info("Waiting for NestJS server to initialize...")
+        time.sleep(5)
     except Exception as e:
         logger.exception(f"Error starting NestJS server: {e}")
 
