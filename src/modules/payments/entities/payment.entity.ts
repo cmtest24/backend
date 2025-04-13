@@ -1,12 +1,11 @@
 import { 
   Entity, 
-  Column, 
   PrimaryGeneratedColumn, 
-  CreateDateColumn, 
-  UpdateDateColumn, 
+  Column, 
   ManyToOne, 
-  JoinColumn,
-  Index 
+  CreateDateColumn, 
+  UpdateDateColumn,
+  JoinColumn
 } from 'typeorm';
 import { Order } from '../../orders/entities/order.entity';
 
@@ -17,34 +16,28 @@ export enum PaymentStatus {
   REFUNDED = 'refunded',
 }
 
-export enum PaymentProvider {
+export enum PaymentMethod {
   BANK_TRANSFER = 'bank_transfer',
-  VNPAY = 'vnpay',
-  MOMO = 'momo',
   CREDIT_CARD = 'credit_card',
-  PAYPAL = 'paypal',
+  COD = 'cod', // Cash on delivery
+  MOMO = 'momo',
+  VNPAY = 'vnpay',
   ZALOPAY = 'zalopay',
 }
 
 @Entity('payments')
-@Index(['orderId'])
-@Index(['status'])
 export class Payment {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column({ unique: true })
-  transactionId: string;
-
-  @ManyToOne(() => Order, order => order.payments)
-  @JoinColumn({ name: 'orderId' })
-  order: Order;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
-  orderId: number;
+  orderId: string;
 
-  @Column('decimal', { precision: 10, scale: 2 })
-  amount: number;
+  @Column({
+    type: 'enum',
+    enum: PaymentMethod,
+  })
+  method: PaymentMethod;
 
   @Column({
     type: 'enum',
@@ -53,23 +46,18 @@ export class Payment {
   })
   status: PaymentStatus;
 
-  @Column({
-    type: 'enum',
-    enum: PaymentProvider,
-  })
-  provider: PaymentProvider;
+  @Column('decimal', { precision: 10, scale: 2 })
+  amount: number;
 
   @Column({ nullable: true })
-  paymentUrl: string;
+  transactionId: string;
 
-  @Column('simple-json', { nullable: true })
-  providerResponse: any;
+  @Column('json', { nullable: true })
+  paymentDetails: Record<string, any>;
 
-  @Column({ type: 'timestamp', nullable: true })
-  paidAt: Date;
-
-  @Column('simple-json', { nullable: true })
-  metadata: any;
+  @ManyToOne(() => Order, (order) => order.payments, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'orderId' })
+  order: Order;
 
   @CreateDateColumn()
   createdAt: Date;

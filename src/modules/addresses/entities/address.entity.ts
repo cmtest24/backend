@@ -1,47 +1,49 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { 
+  Entity, 
+  PrimaryGeneratedColumn, 
+  Column, 
+  ManyToOne, 
+  CreateDateColumn, 
+  UpdateDateColumn,
+  JoinColumn
+} from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 
 @Entity('addresses')
 export class Address {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @Column()
+  @Column({ length: 100 })
   fullName: string;
 
-  @Column()
-  phone: string;
+  @Column({ length: 20 })
+  phoneNumber: string;
 
   @Column()
-  addressLine1: string;
-
-  @Column({ nullable: true })
-  addressLine2: string;
+  street: string;
 
   @Column()
-  city: string;
+  ward: string;
 
   @Column()
   district: string;
 
-  @Column({ nullable: true })
-  ward: string;
+  @Column()
+  city: string;
 
   @Column({ nullable: true })
-  postalCode: string;
+  zipCode: string;
 
   @Column({ default: false })
   isDefault: boolean;
 
-  @Column({ type: 'text', nullable: true })
-  notes: string;
+  @Column()
+  userId: string;
 
-  @ManyToOne(() => User, user => user.addresses)
+  @ManyToOne(() => User, (user) => user.addresses, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
-
-  @Column()
-  userId: number;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -1,256 +1,207 @@
-import { 
-  Injectable, 
-  NotFoundException, 
-  BadRequestException,
-  Inject,
-  CACHE_MANAGER
-} from '@nestjs/common';
+import { Injectable, NotFoundException, Inject, CACHE_MANAGER } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, Between, MoreThanOrEqual } from 'typeorm';
+import { Repository, Between, Like, FindManyOptions } from 'typeorm';
 import { Cache } from 'cache-manager';
-import * as slugify from 'slugify';
-import { Product, ProductStatus } from './entities/product.entity';
-import { Category } from '../categories/entities/category.entity';
+import { Product } from './entities/product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { PaginationOptions, PaginatedResult } from '../../common/interfaces/pagination.interface';
-import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, CACHE_KEYS } from '../../common/constants';
-
-interface ProductFilterOptions extends PaginationOptions {
-  categoryId?: number;
-  search?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  inStock?: boolean;
-}
+import { QueryProductDto, SortField, SortOrder } from './dto/query-product.dto';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectRepository(Product)
     private productsRepository: Repository<Product>,
-    @InjectRepository(Category)
-    private categoriesRepository: Repository<Category>,
-    @Inject(CACHE_MANAGER)
-    private cacheManager: Cache,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
-  async findAll(options: ProductFilterOptions): Promise<PaginatedResult<Product>> {
-    const { 
-      page = 1, 
-      limit = DEFAULT_PAGE_SIZE, 
-      sortBy = 'createdAt', 
-      order = 'DESC',
-      categoryId,
-      search,
-      minPrice,
-      maxPrice,
-      inStock
-    } = options;
-    
-    const take = Math.min(limit, MAX_PAGE_SIZE);
-    const skip = (page - 1) * take;
-    
-    // Build query conditions
-    const whereConditions: any = { status: ProductStatus.ACTIVE };
-    
-    if (categoryId) {
-      whereConditions.categoryId = categoryId;
-    }
-    
-    if (search) {
-      whereConditions.name = Like(`%${search}%`);
-    }
-    
-    if (minPrice && maxPrice) {
-      whereConditions.price = Between(minPrice, maxPrice);
-    } else if (minPrice) {
-      whereConditions.price = MoreThanOrEqual(minPrice);
-    } else if (maxPrice) {
-      whereConditions.price = Between(0, maxPrice);
-    }
-    
-    if (inStock === true) {
-      whereConditions.quantity = MoreThanOrEqual(1);
-    }
-    
-    // Execute query
-    const [products, total] = await this.productsRepository.findAndCount({
-      where: whereConditions,
-      order: { [sortBy]: order },
-      take,
-      skip,
-      relations: ['category'],
-    });
-    
-    const totalPages = Math.ceil(total / take);
-    
-    return {
-      data: products,
-      meta: {
-        total,
-        page,
-        limit: take,
-        totalPages,
-        hasNextPage: page < totalPages,
-        hasPreviousPage: page > 1,
-      },
-    };
-  }
-
-  async findFeatured(): Promise<Product[]> {
-    return this.productsRepository.find({
-      where: {
-        isFeatured: true,
-        status: ProductStatus.ACTIVE,
-      },
-      take: 8,
-      relations: ['category'],
-    });
-  }
-
-  async findOne(id: number): Promise<Product> {
-    const product = await this.productsRepository.findOne({
-      where: { id },
-      relations: ['category'],
-    });
-    
-    if (!product) {
-      throw new NotFoundException(`Product with ID ${id} not found`);
-    }
-    
-    return product;
-  }
-
   async create(createProductDto: CreateProductDto): Promise<Product> {
-    const { categoryId, ...productData } = createProductDto;
-    
-    // Check if category exists
-    const category = await this.categoriesRepository.findOne({
-      where: { id: categoryId },
-    });
-    
-    if (!category) {
-      throw new BadRequestException(`Category with ID ${categoryId} not found`);
-    }
-    
-    // Generate slug from name
-    const slug = this.generateSlug(createProductDto.name);
-    
-    // Check if slug is unique
-    const existingProduct = await this.productsRepository.findOne({
-      where: { slug },
-    });
-    
-    if (existingProduct) {
-      throw new BadRequestException('Product with similar name already exists');
-    }
-    
-    // Create product
-    const product = this.productsRepository.create({
-      ...productData,
-      slug,
-      categoryId,
-    });
-    
+    const product = this.productsRepository.create(createProductDto);
     const savedProduct = await this.productsRepository.save(product);
     
-    // Clear cache
-    await this.clearProductCache();
+    // Clear cache after creating a new product
+    await this.clearCache();
     
     return savedProduct;
   }
 
-  async update(id: number, updateProductDto: UpdateProductDto): Promise<Product> {
-    const product = await this.findOne(id);
+  async findAll(query: QueryProductDto): Promise<{ products: Product[]; total: number }> {
+    const cacheKey = `products_${JSON.stringify(query)}`;
     
-    const { categoryId, ...updateData } = updateProductDto;
+    // Try to get from cache first
+    const cachedResult = await this.cacheManager.get(cacheKey);
+    if (cachedResult) {
+      return cachedResult as { products: Product[]; total: number };
+    }
     
-    // If category is being updated, check if it exists
+    const { 
+      search, 
+      categoryId, 
+      minPrice, 
+      maxPrice, 
+      tag, 
+      featured, 
+      sortBy = SortField.CREATED_AT, 
+      sortOrder = SortOrder.DESC,
+      page = 1,
+      limit = 10
+    } = query;
+    
+    const skip = (page - 1) * limit;
+    
+    const where: any = {};
+    
+    // Apply filters
+    if (search) {
+      where.name = Like(`%${search}%`);
+    }
+    
     if (categoryId) {
-      const category = await this.categoriesRepository.findOne({
-        where: { id: categoryId },
-      });
-      
-      if (!category) {
-        throw new BadRequestException(`Category with ID ${categoryId} not found`);
-      }
+      where.categoryId = categoryId;
     }
     
-    // If name is being updated, update slug
-    if (updateProductDto.name) {
-      const newSlug = this.generateSlug(updateProductDto.name);
-      
-      // Check if new slug is unique (excluding current product)
-      const existingProduct = await this.productsRepository.findOne({
-        where: { slug: newSlug },
-      });
-      
-      if (existingProduct && existingProduct.id !== id) {
-        throw new BadRequestException('Product with similar name already exists');
-      }
-      
-      updateData.slug = newSlug;
+    if (minPrice !== undefined && maxPrice !== undefined) {
+      where.price = Between(minPrice, maxPrice);
+    } else if (minPrice !== undefined) {
+      where.price = Between(minPrice, 1000000); // Some high value
+    } else if (maxPrice !== undefined) {
+      where.price = Between(0, maxPrice);
     }
     
-    // Update product
-    const updatedProduct = await this.productsRepository.save({
-      ...product,
-      ...updateData,
-      ...(categoryId ? { categoryId } : {}),
+    if (tag) {
+      // This is simplified, in real-world would need a more complex query for array containment
+      where.tags = Like(`%${tag}%`);
+    }
+    
+    if (featured !== undefined) {
+      where.isFeatured = featured;
+    }
+    
+    // Default to active products
+    where.isActive = true;
+    
+    const order: any = {};
+    order[sortBy] = sortOrder;
+    
+    const [products, total] = await this.productsRepository.findAndCount({
+      where,
+      order,
+      skip,
+      take: limit,
+      relations: ['category'],
     });
     
+    const result = { products, total };
+    
+    // Cache the result
+    await this.cacheManager.set(cacheKey, result, { ttl: 600 }); // Cache for 10 minutes
+    
+    return result;
+  }
+
+  async findFeatured(): Promise<Product[]> {
+    const cacheKey = 'featured_products';
+    
+    // Try to get from cache first
+    const cachedProducts = await this.cacheManager.get<Product[]>(cacheKey);
+    if (cachedProducts) {
+      return cachedProducts;
+    }
+    
+    const products = await this.productsRepository.find({
+      where: { isFeatured: true, isActive: true },
+      order: { createdAt: 'DESC' },
+      take: 10,
+      relations: ['category'],
+    });
+    
+    // Cache the result
+    await this.cacheManager.set(cacheKey, products, { ttl: 3600 }); // Cache for 1 hour
+    
+    return products;
+  }
+
+  async findOne(id: string): Promise<Product> {
+    const cacheKey = `product_${id}`;
+    
+    // Try to get from cache first
+    const cachedProduct = await this.cacheManager.get<Product>(cacheKey);
+    if (cachedProduct) {
+      return cachedProduct;
+    }
+    
+    const product = await this.productsRepository.findOne({
+      where: { id },
+      relations: ['category', 'reviews', 'reviews.user'],
+    });
+
+    if (!product) {
+      throw new NotFoundException(`Product with ID ${id} not found`);
+    }
+    
+    // Increment view count
+    product.viewCount += 1;
+    await this.productsRepository.save(product);
+    
+    // Cache the result
+    await this.cacheManager.set(cacheKey, product, { ttl: 1800 }); // Cache for 30 minutes
+    
+    return product;
+  }
+
+  async update(id: string, updateProductDto: UpdateProductDto): Promise<Product> {
+    const product = await this.findOne(id);
+    
+    // Update the product
+    Object.assign(product, updateProductDto);
+    
+    const updatedProduct = await this.productsRepository.save(product);
+    
     // Clear cache
-    await this.clearProductCache();
+    await this.clearCache();
+    await this.cacheManager.del(`product_${id}`);
     
     return updatedProduct;
   }
 
-  async remove(id: number): Promise<{ message: string }> {
+  async remove(id: string): Promise<void> {
     const product = await this.findOne(id);
-    
-    // Soft delete by changing status to inactive
-    product.status = ProductStatus.INACTIVE;
-    await this.productsRepository.save(product);
+
+    await this.productsRepository.remove(product);
     
     // Clear cache
-    await this.clearProductCache();
-    
-    return { message: `Product with ID ${id} has been deactivated` };
+    await this.clearCache();
+    await this.cacheManager.del(`product_${id}`);
   }
   
-  async updateProductRating(productId: number): Promise<void> {
-    const product = await this.findOne(productId);
-    
+  async updateRating(productId: string): Promise<void> {
     // Calculate new average rating
     const result = await this.productsRepository
       .createQueryBuilder('product')
       .leftJoin('product.reviews', 'review')
-      .select('AVG(review.rating)', 'avgRating')
-      .addSelect('COUNT(review.id)', 'reviewCount')
-      .where('product.id = :id', { id: productId })
+      .select('AVG(review.rating)', 'avg')
+      .addSelect('COUNT(review.id)', 'count')
+      .where('product.id = :productId', { productId })
       .getRawOne();
     
-    // Update product with new rating data
-    product.avgRating = result.avgRating || 0;
-    product.reviewCount = result.reviewCount || 0;
+    const averageRating = result.avg ? parseFloat(result.avg) : 0;
+    const reviewCount = result.count ? parseInt(result.count) : 0;
     
-    await this.productsRepository.save(product);
-    
-    // Clear product cache
-    await this.cacheManager.del(CACHE_KEYS.PRODUCT_DETAILS(productId));
-  }
-
-  private generateSlug(name: string): string {
-    return slugify(name, {
-      lower: true,
-      strict: true,
-      locale: 'vi',
+    // Update the product
+    await this.productsRepository.update(productId, {
+      averageRating: averageRating,
+      reviewCount: reviewCount,
     });
+    
+    // Clear cache
+    await this.cacheManager.del(`product_${productId}`);
   }
-
-  private async clearProductCache(): Promise<void> {
-    await this.cacheManager.del(CACHE_KEYS.PRODUCTS);
-    await this.cacheManager.del(CACHE_KEYS.FEATURED_PRODUCTS);
+  
+  private async clearCache(): Promise<void> {
+    // Clear all products-related cache
+    // This is a simplified approach - in production you might want to be more selective
+    const keys = await this.cacheManager.store.keys('products_*');
+    await Promise.all(keys.map(key => this.cacheManager.del(key)));
+    await this.cacheManager.del('featured_products');
   }
 }

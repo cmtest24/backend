@@ -1,34 +1,34 @@
 import { 
   Entity, 
   PrimaryGeneratedColumn, 
-  CreateDateColumn, 
+  Column, 
   ManyToOne, 
-  JoinColumn, 
-  Column,
-  Index
+  CreateDateColumn,
+  JoinColumn,
+  Unique
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Product } from '../../products/entities/product.entity';
 
 @Entity('wishlist')
-@Index(['userId', 'productId'], { unique: true })
+@Unique(['userId', 'productId'])
 export class Wishlist {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @ManyToOne(() => User, user => user.wishlistItems)
+  @Column()
+  userId: string;
+
+  @Column()
+  productId: string;
+
+  @ManyToOne(() => User, (user) => user.wishlistItems, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Column()
-  userId: number;
-
-  @ManyToOne(() => Product, product => product.wishlistItems)
+  @ManyToOne(() => Product, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'productId' })
   product: Product;
-
-  @Column()
-  productId: number;
 
   @CreateDateColumn()
   createdAt: Date;

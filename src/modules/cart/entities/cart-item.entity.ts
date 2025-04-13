@@ -3,36 +3,34 @@ import {
   PrimaryGeneratedColumn, 
   Column, 
   ManyToOne, 
-  JoinColumn, 
-  CreateDateColumn,
+  CreateDateColumn, 
   UpdateDateColumn,
-  Index
+  JoinColumn
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Product } from '../../products/entities/product.entity';
 
 @Entity('cart_items')
-@Index(['userId', 'productId'], { unique: true })
 export class CartItem {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @ManyToOne(() => User, user => user.cartItems)
+  @Column()
+  userId: string;
+
+  @Column()
+  productId: string;
+
+  @Column('int')
+  quantity: number;
+
+  @ManyToOne(() => User, (user) => user.cartItems, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Column()
-  userId: number;
-
-  @ManyToOne(() => Product, product => product.cartItems)
+  @ManyToOne(() => Product, (product) => product.cartItems, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'productId' })
   product: Product;
-
-  @Column()
-  productId: number;
-
-  @Column()
-  quantity: number;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -1,71 +1,88 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
   Put,
-  Body, 
-  Param, 
-  Query,
   UseGuards,
-  Req,
-  ParseIntPipe
+  Request,
 } from '@nestjs/common';
-import { 
-  ApiBearerAuth, 
-  ApiTags, 
-  ApiOperation, 
-  ApiResponse,
-  ApiQuery 
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { PaginationOptions } from '../../common/interfaces/pagination.interface';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { Role } from '../../common/constants/role.enum';
 
-@ApiTags('Orders')
+@ApiTags('orders')
 @Controller('orders')
-@UseGuards(JwtAuthGuard)
-@ApiBearerAuth()
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Create a new order' })
+  @ApiResponse({ status: 201, description: 'Order created successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid input or insufficient stock' })
+  @ApiBearerAuth()
+  create(@Request() req, @Body() createOrderDto: CreateOrderDto) {
+    return this.ordersService.create(req.user.id, createOrderDto);
+  }
+
   @Get()
-  @ApiOperation({ summary: 'Get all orders for the current user' })
-  @ApiResponse({ status: 200, description: 'Return all orders.' })
-  @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiQuery({ name: 'sortBy', required: false, type: String })
-  @ApiQuery({ name: 'order', required: false, enum: ['ASC', 'DESC'] })
-  @ApiQuery({ name: 'status', required: false, type: String })
-  findAll(
-    @Req() req,
-    @Query() paginationOptions: PaginationOptions,
-    @Query('status') status?: string,
-  ) {
-    return this.ordersService.findAllByUser(req.user.id, paginationOptions, status);
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get user orders' })
+  @ApiResponse({ status: 200, description: 'Return user orders' })
+  @ApiBearerAuth()
+  findAllByUser(@Request() req) {
+    return this.ordersService.findAllByUser(req.user.id);
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get order by ID' })
-  @ApiResponse({ status: 200, description: 'Return the order.' })
-  @ApiResponse({ status: 404, description: 'Order not found.' })
-  findOne(@Param('id', ParseIntPipe) id: number, @Req() req) {
-    return this.ordersService.findOneByUser(id, req.user.id);
-  }
-
-  @Post()
-  @ApiOperation({ summary: 'Create a new order' })
-  @ApiResponse({ status: 201, description: 'Order created successfully.' })
-  create(@Body() createOrderDto: CreateOrderDto, @Req() req) {
-    return this.ordersService.create(createOrderDto, req.user.id);
+  @ApiResponse({ status: 200, description: 'Return the order' })
+  @ApiResponse({ status: 404, description: 'Order not found' })
+  @ApiBearerAuth()
+  findOne(@Request() req, @Param('id') id: string) {
+    return this.ordersService.findOne(req.user.id, id);
   }
 
   @Put(':id/cancel')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Cancel an order' })
-  @ApiResponse({ status: 200, description: 'Order cancelled successfully.' })
-  @ApiResponse({ status: 400, description: 'Order cannot be cancelled.' })
-  @ApiResponse({ status: 404, description: 'Order not found.' })
-  cancel(@Param('id', ParseIntPipe) id: number, @Req() req) {
-    return this.ordersService.cancelOrder(id, req.user.id);
+  @ApiResponse({ status: 200, description: 'Order cancelled successfully' })
+  @ApiResponse({ status: 400, description: 'Order cannot be cancelled' })
+  @ApiResponse({ status: 404, description: 'Order not found' })
+  @ApiBearerAuth()
+  cancel(@Request() req, @Param('id') id: string, @Body('reason') reason?: string) {
+    return this.ordersService.cancelOrder(req.user.id, id, reason);
+  }
+
+  @Get('admin/orders')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Get all orders (admin only)' })
+  @ApiResponse({ status: 200, description: 'Return all orders' })
+  @ApiBearerAuth()
+  findAll() {
+    return this.ordersService.findAll();
+  }
+
+  @Put('admin/orders/:id/status')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Update order status (admin only)' })
+  @ApiResponse({ status: 200, description: 'Order status updated successfully' })
+  @ApiResponse({ status: 404, description: 'Order not found' })
+  @ApiBearerAuth()
+  updateStatus(
+    @Param('id') id: string,
+    @Body() updateOrderStatusDto: UpdateOrderStatusDto,
+  ) {
+    return this.ordersService.updateStatus(id, updateOrderStatusDto);
   }
 }

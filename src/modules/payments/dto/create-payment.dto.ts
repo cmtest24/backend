@@ -1,20 +1,20 @@
-import { IsNotEmpty, IsNumber, IsEnum, IsOptional, IsString } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
-import { PaymentProvider } from '../entities/payment.entity';
+import { IsNotEmpty, IsString, IsEnum, IsOptional, IsObject } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { PaymentMethod } from '../entities/payment.entity';
 
 export class CreatePaymentDto {
-  @ApiProperty({ example: 1 })
+  @ApiProperty({ description: 'Order ID to pay for' })
   @IsNotEmpty()
-  @IsNumber()
-  orderId: number;
-
-  @ApiProperty({ enum: PaymentProvider, example: PaymentProvider.VNPAY })
-  @IsNotEmpty()
-  @IsEnum(PaymentProvider)
-  provider: PaymentProvider;
-
-  @ApiProperty({ example: 'https://callback-url.com', required: false })
-  @IsOptional()
   @IsString()
-  returnUrl?: string;
+  orderId: string;
+
+  @ApiProperty({ description: 'Payment method', enum: PaymentMethod })
+  @IsNotEmpty()
+  @IsEnum(PaymentMethod)
+  method: PaymentMethod;
+
+  @ApiPropertyOptional({ description: 'Additional payment details' })
+  @IsOptional()
+  @IsObject()
+  paymentDetails?: Record<string, any>;
 }

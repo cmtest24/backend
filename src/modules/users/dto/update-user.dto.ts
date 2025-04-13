@@ -1,46 +1,36 @@
-import { IsEmail, IsString, IsOptional, IsEnum, MinLength, Matches, MaxLength } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
-import { UserRole, UserStatus } from '../entities/user.entity';
+import { IsEmail, IsString, MinLength, IsOptional, IsEnum } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Role } from '../../../common/constants/role.enum';
 
 export class UpdateUserDto {
-  @ApiProperty({ example: 'Nguyen Van A', required: false })
+  @ApiPropertyOptional({ description: 'Full name of the user' })
   @IsOptional()
   @IsString()
-  @MaxLength(100)
   fullName?: string;
 
-  @ApiProperty({ example: 'user@example.com', required: false })
+  @ApiPropertyOptional({ description: 'Email address of the user' })
   @IsOptional()
   @IsEmail()
   email?: string;
 
-  @ApiProperty({ example: '+84123456789', required: false })
-  @IsOptional()
-  @Matches(/^\+?[0-9]{10,15}$/, { message: 'Phone number must be valid' })
-  phone?: string;
-
-  @ApiProperty({ example: 'NewPassword123!', required: false })
+  @ApiPropertyOptional({ description: 'Phone number of the user' })
   @IsOptional()
   @IsString()
-  @MinLength(8)
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/, {
-    message: 'Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character',
-  })
+  phoneNumber?: string;
+
+  @ApiPropertyOptional({ description: 'Password for the user account' })
+  @IsOptional()
+  @IsString()
+  @MinLength(6)
   password?: string;
 
-  @ApiProperty({ example: 'https://example.com/avatar.jpg', required: false })
+  @ApiPropertyOptional({ description: 'Role of the user', enum: Role })
+  @IsOptional()
+  @IsEnum(Role)
+  role?: Role;
+
+  @ApiPropertyOptional({ description: 'URL to the user avatar image' })
   @IsOptional()
   @IsString()
-  avatar?: string;
-
-  // Admin only fields
-  @ApiProperty({ enum: UserRole, required: false })
-  @IsOptional()
-  @IsEnum(UserRole)
-  role?: UserRole;
-
-  @ApiProperty({ enum: UserStatus, required: false })
-  @IsOptional()
-  @IsEnum(UserStatus)
-  status?: UserStatus;
+  avatarUrl?: string;
 }

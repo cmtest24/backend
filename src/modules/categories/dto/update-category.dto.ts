@@ -1,27 +1,29 @@
-import { IsOptional, IsString, IsNumber } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsString, IsOptional, IsBoolean, IsNumber } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateCategoryDto {
-  @ApiProperty({ example: 'Thảo dược cao cấp', required: false })
+  @ApiPropertyOptional({ description: 'Name of the category' })
   @IsOptional()
   @IsString()
   name?: string;
 
-  @ApiProperty({ example: 'Các sản phẩm thảo dược tự nhiên cao cấp', required: false })
+  @ApiPropertyOptional({ description: 'Description of the category' })
   @IsOptional()
   @IsString()
   description?: string;
 
-  @ApiProperty({ example: 'https://example.com/new-category-image.jpg', required: false })
+  @ApiPropertyOptional({ description: 'URL to the category image' })
   @IsOptional()
   @IsString()
-  image?: string;
+  imageUrl?: string;
 
-  @ApiProperty({ example: 2, required: false })
+  @ApiPropertyOptional({ description: 'Whether the category is active' })
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+
+  @ApiPropertyOptional({ description: 'Order for sorting categories' })
   @IsOptional()
   @IsNumber()
-  parentId?: number;
-  
-  // This will be set automatically if name is changed
-  slug?: string;
+  sortOrder?: number;
 }

@@ -1,104 +1,86 @@
 import { 
-  IsOptional, 
   IsString, 
   IsNumber, 
-  IsArray, 
-  IsEnum, 
+  IsOptional, 
   IsBoolean, 
-  IsObject,
-  Min,
-  ValidateNested
+  IsArray, 
+  Min, 
+  Max,
+  IsPositive
 } from 'class-validator';
-import { Type } from 'class-transformer';
-import { ApiProperty } from '@nestjs/swagger';
-import { ProductStatus } from '../entities/product.entity';
-import { AttributeDto } from './create-product.dto';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateProductDto {
-  @ApiProperty({ example: 'Đông Trùng Hạ Thảo Organic Premium', required: false })
+  @ApiPropertyOptional({ description: 'Name of the product' })
   @IsOptional()
   @IsString()
   name?: string;
 
-  @ApiProperty({ example: 'Đông Trùng Hạ Thảo tự nhiên được thu hái tại vùng núi cao', required: false })
+  @ApiPropertyOptional({ description: 'Detailed description of the product' })
   @IsOptional()
   @IsString()
   description?: string;
 
-  @ApiProperty({ example: 'Sản phẩm thảo dược 100% tự nhiên', required: false })
+  @ApiPropertyOptional({ description: 'Regular price of the product' })
   @IsOptional()
-  @IsString()
-  shortDescription?: string;
-
-  @ApiProperty({ example: 280000, required: false })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @IsPositive()
   price?: number;
 
-  @ApiProperty({ example: 320000, required: false })
+  @ApiPropertyOptional({ description: 'Sale price of the product' })
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
+  salePrice?: number;
+
+  @ApiPropertyOptional({ description: 'Stock quantity of the product' })
   @IsOptional()
   @IsNumber()
   @Min(0)
-  originalPrice?: number;
+  stockQuantity?: number;
 
-  @ApiProperty({ example: 150, required: false })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  quantity?: number;
-
-  @ApiProperty({ example: ['https://example.com/image1.jpg'], required: false })
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  images?: string[];
-
-  @ApiProperty({ example: 'https://example.com/new-thumbnail.jpg', required: false })
+  @ApiPropertyOptional({ description: 'URL to the main product image' })
   @IsOptional()
   @IsString()
-  thumbnail?: string;
+  imageUrl?: string;
 
-  @ApiProperty({ enum: ProductStatus, required: false })
+  @ApiPropertyOptional({ description: 'Additional product images' })
   @IsOptional()
-  @IsEnum(ProductStatus)
-  status?: ProductStatus;
+  @IsArray()
+  additionalImages?: string[];
 
-  @ApiProperty({ example: false, required: false })
+  @ApiPropertyOptional({ description: 'Tags associated with the product' })
+  @IsOptional()
+  @IsArray()
+  tags?: string[];
+
+  @ApiPropertyOptional({ description: 'Whether the product is active' })
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+
+  @ApiPropertyOptional({ description: 'Whether the product is featured' })
   @IsOptional()
   @IsBoolean()
   isFeatured?: boolean;
 
-  @ApiProperty({ example: { weightInGrams: 75, origin: 'Vietnam' }, required: false })
+  @ApiPropertyOptional({ description: 'Product specifications in detail' })
   @IsOptional()
-  @IsObject()
-  metadata?: Record<string, any>;
+  @IsString()
+  specifications?: string;
 
-  @ApiProperty({ type: [AttributeDto], required: false })
+  @ApiPropertyOptional({ description: 'Usage instructions for the product' })
   @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => AttributeDto)
-  attributes?: AttributeDto[];
+  @IsString()
+  usageInstructions?: string;
 
-  @ApiProperty({ example: ['premium', 'organic', 'herbal'], required: false })
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  tags?: string[];
-
-  @ApiProperty({ example: 'DTHY-002', required: false })
+  @ApiPropertyOptional({ description: 'Stock keeping unit (SKU)' })
   @IsOptional()
   @IsString()
   sku?: string;
 
-  @ApiProperty({ example: '8938500886046', required: false })
+  @ApiPropertyOptional({ description: 'Category ID the product belongs to' })
   @IsOptional()
   @IsString()
-  barcode?: string;
-
-  @ApiProperty({ example: 2, required: false })
-  @IsOptional()
-  @IsNumber()
-  categoryId?: number;
+  categoryId?: string;
 }

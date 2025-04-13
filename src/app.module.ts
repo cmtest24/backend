@@ -1,8 +1,8 @@
 import { Module, CacheModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ThrottlerModule } from '@nestjs/throttler';
 import * as redisStore from 'cache-manager-redis-store';
+import { JwtModule } from '@nestjs/jwt';
 
 import { databaseConfig } from './config/database.config';
 import { redisConfig } from './config/redis.config';
@@ -25,7 +25,7 @@ import { SubscriptionsModule } from './modules/subscriptions/subscriptions.modul
 
 @Module({
   imports: [
-    // Config
+    // Configuration
     ConfigModule.forRoot({
       isGlobal: true,
       load: [databaseConfig, redisConfig, jwtConfig],
@@ -37,14 +37,14 @@ import { SubscriptionsModule } from './modules/subscriptions/subscriptions.modul
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        host: configService.get<string>('database.host'),
-        port: configService.get<number>('database.port'),
-        username: configService.get<string>('database.username'),
-        password: configService.get<string>('database.password'),
-        database: configService.get<string>('database.database'),
+        host: configService.get('database.host'),
+        port: configService.get('database.port'),
+        username: configService.get('database.username'),
+        password: configService.get('database.password'),
+        database: configService.get('database.database'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: true, // Set to false in production
-        logging: false,
+        synchronize: true, // set to false in production
+        logging: true,
       }),
     }),
     
@@ -53,18 +53,24 @@ import { SubscriptionsModule } from './modules/subscriptions/subscriptions.modul
       isGlobal: true,
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: (configService: ConfigService) => ({
         store: redisStore,
-        host: configService.get<string>('redis.host'),
-        port: configService.get<number>('redis.port'),
-        ttl: configService.get<number>('redis.ttl'),
+        host: configService.get('redis.host'),
+        port: configService.get('redis.port'),
+        ttl: configService.get('redis.ttl'),
       }),
     }),
     
-    // Rate limiting
-    ThrottlerModule.forRoot({
-      ttl: 60,
-      limit: 100,
+    // JWT
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get('jwt.secret'),
+        signOptions: {
+          expiresIn: configService.get('jwt.expiresIn'),
+        },
+      }),
     }),
     
     // Feature modules

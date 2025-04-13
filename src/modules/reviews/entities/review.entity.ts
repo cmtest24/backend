@@ -1,49 +1,45 @@
 import { 
   Entity, 
-  Column, 
   PrimaryGeneratedColumn, 
-  CreateDateColumn, 
-  UpdateDateColumn, 
+  Column, 
   ManyToOne, 
-  JoinColumn,
-  Index
+  CreateDateColumn, 
+  UpdateDateColumn,
+  JoinColumn
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Product } from '../../products/entities/product.entity';
 
 @Entity('reviews')
-@Index(['userId'])
-@Index(['productId'])
-@Index(['productId', 'userId'], { unique: true })
 export class Review {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @ManyToOne(() => User, user => user.reviews)
-  @JoinColumn({ name: 'userId' })
-  user: User;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
-  userId: number;
-
-  @ManyToOne(() => Product, product => product.reviews)
-  @JoinColumn({ name: 'productId' })
-  product: Product;
+  userId: string;
 
   @Column()
-  productId: number;
+  productId: string;
 
-  @Column({ type: 'int', default: 5 })
+  @Column('int')
   rating: number;
 
   @Column('text')
   comment: string;
 
-  @Column({ type: 'simple-array', nullable: true })
-  images: string[];
+  @Column({ nullable: true })
+  imageUrl: string;
 
   @Column({ default: true })
-  isVisible: boolean;
+  isPublished: boolean;
+
+  @ManyToOne(() => User, (user) => user.reviews, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'userId' })
+  user: User;
+
+  @ManyToOne(() => Product, (product) => product.reviews, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'productId' })
+  product: Product;
 
   @CreateDateColumn()
   createdAt: Date;

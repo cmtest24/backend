@@ -1,25 +1,23 @@
 import { 
   IsNotEmpty, 
   IsString, 
-  IsEmail, 
-  IsEnum,
   IsOptional, 
+  IsNumber, 
+  Min,
   IsArray,
   ValidateNested,
-  IsNumber,
-  Min
+  ArrayMinSize
 } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { ApiProperty } from '@nestjs/swagger';
-import { PaymentMethod } from '../entities/order.entity';
 
 class OrderItemDto {
-  @ApiProperty({ example: 1 })
+  @ApiProperty({ description: 'Product ID' })
   @IsNotEmpty()
-  @IsNumber()
-  productId: number;
+  @IsString()
+  productId: string;
 
-  @ApiProperty({ example: 2 })
+  @ApiProperty({ description: 'Quantity', minimum: 1 })
   @IsNotEmpty()
   @IsNumber()
   @Min(1)
@@ -27,71 +25,60 @@ class OrderItemDto {
 }
 
 export class CreateOrderDto {
-  @ApiProperty({ example: 'Nguyen Van A' })
+  @ApiPropertyOptional({ description: 'Order items (if not using cart items)' })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @ArrayMinSize(1)
+  @Type(() => OrderItemDto)
+  items?: OrderItemDto[];
+
+  @ApiProperty({ description: 'Shipping full name' })
   @IsNotEmpty()
   @IsString()
-  customerName: string;
+  shippingFullName: string;
 
-  @ApiProperty({ example: 'user@example.com' })
-  @IsNotEmpty()
-  @IsEmail()
-  customerEmail: string;
-
-  @ApiProperty({ example: '+84123456789' })
+  @ApiProperty({ description: 'Shipping phone number' })
   @IsNotEmpty()
   @IsString()
-  customerPhone: string;
+  shippingPhone: string;
 
-  @ApiProperty({ example: '123 Main Street, Apartment 4B' })
+  @ApiProperty({ description: 'Shipping address' })
   @IsNotEmpty()
   @IsString()
   shippingAddress: string;
 
-  @ApiProperty({ example: 'Ho Chi Minh City' })
-  @IsOptional()
-  @IsString()
-  shippingCity?: string;
-
-  @ApiProperty({ example: 'District 1' })
-  @IsOptional()
-  @IsString()
-  shippingDistrict?: string;
-
-  @ApiProperty({ example: 'Ben Nghe Ward' })
-  @IsOptional()
-  @IsString()
-  shippingWard?: string;
-
-  @ApiProperty({ example: 'Please call before delivery', required: false })
-  @IsOptional()
-  @IsString()
-  notes?: string;
-
-  @ApiProperty({ enum: PaymentMethod, example: PaymentMethod.COD })
+  @ApiProperty({ description: 'Shipping ward/community' })
   @IsNotEmpty()
-  @IsEnum(PaymentMethod)
-  paymentMethod: PaymentMethod;
+  @IsString()
+  shippingWard: string;
 
-  @ApiProperty({ example: 'SUMMER10', required: false })
+  @ApiProperty({ description: 'Shipping district' })
+  @IsNotEmpty()
+  @IsString()
+  shippingDistrict: string;
+
+  @ApiProperty({ description: 'Shipping city/province' })
+  @IsNotEmpty()
+  @IsString()
+  shippingCity: string;
+
+  @ApiPropertyOptional({ description: 'Shipping postal/zip code' })
+  @IsOptional()
+  @IsString()
+  shippingZipCode?: string;
+
+  @ApiPropertyOptional({ description: 'Promotion code' })
   @IsOptional()
   @IsString()
   promotionCode?: string;
 
-  @ApiProperty({ example: [{productId: 1, quantity: 2}], type: [OrderItemDto] })
+  @ApiPropertyOptional({ description: 'Order note' })
   @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => OrderItemDto)
-  items?: OrderItemDto[];
+  @IsString()
+  note?: string;
 
-  // If creating from cart, no need to specify items
-  @ApiProperty({ example: true, required: false })
+  @ApiPropertyOptional({ description: 'Use items from cart', default: true })
   @IsOptional()
-  useCart?: boolean;
-
-  // Optional shipping address ID to use from user's saved addresses
-  @ApiProperty({ example: 1, required: false })
-  @IsOptional()
-  @IsNumber()
-  addressId?: number;
+  useCartItems?: boolean = true;
 }

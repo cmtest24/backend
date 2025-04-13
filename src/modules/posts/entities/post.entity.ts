@@ -1,67 +1,52 @@
 import { 
   Entity, 
-  Column, 
   PrimaryGeneratedColumn, 
+  Column, 
   CreateDateColumn, 
-  UpdateDateColumn, 
-  ManyToOne, 
-  JoinColumn,
-  Index 
+  UpdateDateColumn,
+  Index
 } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
-
-export enum PostStatus {
-  DRAFT = 'draft',
-  PUBLISHED = 'published',
-  ARCHIVED = 'archived',
-}
 
 @Entity('posts')
-@Index(['slug'], { unique: true })
-@Index(['status'])
-@Index(['authorId'])
 export class Post {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
+  @Index()
   title: string;
 
   @Column({ unique: true })
+  @Index()
   slug: string;
 
   @Column('text')
   content: string;
 
-  @Column('text', { nullable: true })
-  excerpt: string;
+  @Column({ nullable: true })
+  summary: string;
 
   @Column({ nullable: true })
-  featuredImage: string;
+  imageUrl: string;
 
-  @ManyToOne(() => User, user => user.posts)
-  @JoinColumn({ name: 'authorId' })
-  author: User;
+  @Column({ default: true })
+  isPublished: boolean;
 
-  @Column()
-  authorId: number;
-
-  @Column({
-    type: 'enum',
-    enum: PostStatus,
-    default: PostStatus.DRAFT,
-  })
-  status: PostStatus;
-
-  @Column({ type: 'simple-array', nullable: true })
+  @Column('simple-array', { nullable: true })
   tags: string[];
 
-  @Column({ type: 'timestamp', nullable: true })
-  publishedAt: Date;
+  @Column({ nullable: true })
+  authorName: string;
+
+  @Column({ default: 0 })
+  viewCount: number;
 
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Column({ nullable: true })
+  publishedAt: Date;
 }

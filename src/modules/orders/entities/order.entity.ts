@@ -1,13 +1,12 @@
 import { 
   Entity, 
-  Column, 
   PrimaryGeneratedColumn, 
-  CreateDateColumn, 
-  UpdateDateColumn, 
+  Column, 
   ManyToOne, 
   OneToMany, 
-  JoinColumn,
-  Index 
+  CreateDateColumn, 
+  UpdateDateColumn,
+  JoinColumn
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { OrderItem } from './order-item.entity';
@@ -19,56 +18,15 @@ export enum OrderStatus {
   SHIPPED = 'shipped',
   DELIVERED = 'delivered',
   CANCELLED = 'cancelled',
-  REFUNDED = 'refunded',
-}
-
-export enum PaymentMethod {
-  COD = 'cash_on_delivery',
-  BANK_TRANSFER = 'bank_transfer',
-  CREDIT_CARD = 'credit_card',
-  EWALLET = 'e_wallet',
 }
 
 @Entity('orders')
-@Index(['userId'])
-@Index(['status'])
 export class Order {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column({ unique: true })
-  orderNumber: string;
-
-  @ManyToOne(() => User, user => user.orders)
-  @JoinColumn({ name: 'userId' })
-  user: User;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
-  userId: number;
-
-  @Column()
-  customerName: string;
-
-  @Column()
-  customerEmail: string;
-
-  @Column()
-  customerPhone: string;
-
-  @Column()
-  shippingAddress: string;
-
-  @Column({ nullable: true })
-  shippingCity: string;
-
-  @Column({ nullable: true })
-  shippingDistrict: string;
-
-  @Column({ nullable: true })
-  shippingWard: string;
-
-  @Column('text', { nullable: true })
-  notes: string;
+  userId: string;
 
   @Column({
     type: 'enum',
@@ -77,18 +35,8 @@ export class Order {
   })
   status: OrderStatus;
 
-  @Column({
-    type: 'enum',
-    enum: PaymentMethod,
-    default: PaymentMethod.COD,
-  })
-  paymentMethod: PaymentMethod;
-
-  @Column({ default: false })
-  isPaid: boolean;
-
   @Column('decimal', { precision: 10, scale: 2 })
-  totalAmount: number;
+  subtotal: number;
 
   @Column('decimal', { precision: 10, scale: 2, default: 0 })
   shippingFee: number;
@@ -96,27 +44,50 @@ export class Order {
   @Column('decimal', { precision: 10, scale: 2, default: 0 })
   discount: number;
 
+  @Column('decimal', { precision: 10, scale: 2 })
+  total: number;
+
   @Column({ nullable: true })
   promotionCode: string;
 
-  @Column({ type: 'timestamp', nullable: true })
-  paidAt: Date;
+  @Column({ nullable: true })
+  note: string;
 
-  @Column({ type: 'timestamp', nullable: true })
-  shippedAt: Date;
+  @Column()
+  shippingFullName: string;
 
-  @Column({ type: 'timestamp', nullable: true })
-  deliveredAt: Date;
+  @Column()
+  shippingPhone: string;
 
-  @Column({ type: 'timestamp', nullable: true })
-  cancelledAt: Date;
+  @Column()
+  shippingAddress: string;
 
-  @OneToMany(() => OrderItem, orderItem => orderItem.order, {
-    cascade: true,
-  })
+  @Column()
+  shippingWard: string;
+
+  @Column()
+  shippingDistrict: string;
+
+  @Column()
+  shippingCity: string;
+
+  @Column({ nullable: true })
+  shippingZipCode: string;
+
+  @Column({ nullable: true })
+  trackingNumber: string;
+
+  @Column({ nullable: true })
+  cancelReason: string;
+
+  @ManyToOne(() => User, (user) => user.orders)
+  @JoinColumn({ name: 'userId' })
+  user: User;
+
+  @OneToMany(() => OrderItem, (orderItem) => orderItem.order, { cascade: true })
   items: OrderItem[];
 
-  @OneToMany(() => Payment, payment => payment.order)
+  @OneToMany(() => Payment, (payment) => payment.order)
   payments: Payment[];
 
   @CreateDateColumn()

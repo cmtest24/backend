@@ -1,16 +1,10 @@
-import { 
-  Injectable, 
-  NotFoundException, 
-  ConflictException 
-} from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
-import { User, UserStatus } from './entities/user.entity';
+import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { PaginationOptions, PaginatedResult } from '../../common/interfaces/pagination.interface';
-import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '../../common/constants';
+import { PasswordUtil } from '../../common/utils/password.util';
 
 @Injectable()
 export class UsersService {
@@ -20,125 +14,72 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const { email, password, phone } = createUserDto;
+    try {
+      // Check if user with email already exists
+      const existingUser = await this.usersRepository.findOne({
+        where: { email: createUserDto.email },
+      });
 
-    // Check if user with same email or phone exists
-    const existingUser = await this.usersRepository.findOne({
-      where: [{ email }, ...(phone ? [{ phone }] : [])],
-    });
+      if (existingUser) {
+        throw new ConflictException('Email already in use');
+      }
 
-    if (existingUser) {
-      throw new ConflictException('Email or phone number already exists');
+      // Hash the password
+      const hashedPassword = await PasswordUtil.hash(createUserDto.password);
+
+      // Create new user
+      const user = this.usersRepository.create({
+        ...createUserDto,
+        password: hashedPassword,
+      });
+
+      return await this.usersRepository.save(user);
+    } catch (error) {
+      if (error instanceof ConflictException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Error creating user');
     }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create and save user
-    const user = this.usersRepository.create({
-      ...createUserDto,
-      password: hashedPassword,
-    });
-
-    await this.usersRepository.save(user);
-
-    // Remove password from response
-    delete user.password;
-    return user;
   }
 
-  async findAll(options: PaginationOptions): Promise<PaginatedResult<User>> {
-    const page = options.page || 1;
-    const limit = Math.min(options.limit || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
-    const sortBy = options.sortBy || 'createdAt';
-    const order = options.order || 'DESC';
-    
-    const [users, total] = await this.usersRepository.findAndCount({
-      order: { [sortBy]: order },
-      take: limit,
-      skip: (page - 1) * limit,
-    });
-
-    const totalPages = Math.ceil(total / limit);
-
-    return {
-      data: users,
-      meta: {
-        total,
-        page,
-        limit,
-        totalPages,
-        hasNextPage: page < totalPages,
-        hasPreviousPage: page > 1,
-      },
-    };
+  async findAll(): Promise<User[]> {
+    return this.usersRepository.find();
   }
 
-  async findOne(id: number): Promise<User> {
-    const user = await this.usersRepository.findOne({ 
-      where: { id },
-      relations: ['addresses'],
-    });
-    
+  async findOne(id: string): Promise<User> {
+    const user = await this.usersRepository.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
-    
     return user;
   }
 
   async findByEmail(email: string): Promise<User> {
-    return this.usersRepository.findOne({ where: { email } });
+    const user = await this.usersRepository.findOne({ where: { email } });
+    if (!user) {
+      throw new NotFoundException(`User with email ${email} not found`);
+    }
+    return user;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.findOne(id);
-    
-    // If email is being updated, check for uniqueness
-    if (updateUserDto.email && updateUserDto.email !== user.email) {
-      const existingUser = await this.usersRepository.findOne({
-        where: { email: updateUserDto.email },
-      });
-      
-      if (existingUser) {
-        throw new ConflictException('Email already exists');
-      }
-    }
-    
-    // If phone is being updated, check for uniqueness
-    if (updateUserDto.phone && updateUserDto.phone !== user.phone) {
-      const existingUser = await this.usersRepository.findOne({
-        where: { phone: updateUserDto.phone },
-      });
-      
-      if (existingUser) {
-        throw new ConflictException('Phone number already exists');
-      }
-    }
-    
-    // If password is provided, hash it
+
+    // If updating password, hash it first
     if (updateUserDto.password) {
-      updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+      updateUserDto.password = await PasswordUtil.hash(updateUserDto.password);
     }
-    
-    // Update and return user
-    const updatedUser = await this.usersRepository.save({
-      ...user,
-      ...updateUserDto,
-    });
-    
-    // Remove password from response
-    delete updatedUser.password;
-    return updatedUser;
+
+    // Update user properties
+    Object.assign(user, updateUserDto);
+
+    return this.usersRepository.save(user);
   }
 
-  async remove(id: number): Promise<{ message: string }> {
-    const user = await this.findOne(id);
-    
-    // Soft delete by marking as inactive
-    user.status = UserStatus.INACTIVE;
-    await this.usersRepository.save(user);
-    
-    return { message: `User with ID ${id} has been deactivated` };
+  async remove(id: string): Promise<void> {
+    const result = await this.usersRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
   }
 }

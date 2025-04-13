@@ -1,15 +1,20 @@
 import { IsNotEmpty, IsEnum, IsOptional, IsString } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { OrderStatus } from '../entities/order.entity';
 
 export class UpdateOrderStatusDto {
-  @ApiProperty({ enum: OrderStatus, example: OrderStatus.PROCESSING })
+  @ApiProperty({ description: 'New order status', enum: OrderStatus })
   @IsNotEmpty()
   @IsEnum(OrderStatus)
   status: OrderStatus;
 
-  @ApiProperty({ example: 'Order is being processed', required: false })
+  @ApiPropertyOptional({ description: 'Tracking number for shipped orders' })
   @IsOptional()
   @IsString()
-  statusNote?: string;
+  trackingNumber?: string;
+
+  @ApiPropertyOptional({ description: 'Reason for cancellation if status is cancelled' })
+  @IsOptional()
+  @IsString()
+  cancelReason?: string;
 }

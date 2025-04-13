@@ -1,19 +1,11 @@
-import { 
-  Injectable, 
-  NotFoundException, 
-  BadRequestException, 
-  ForbiddenException,
-  ConflictException 
-} from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Review } from './entities/review.entity';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
 import { ProductsService } from '../products/products.service';
-import { PaginationOptions, PaginatedResult } from '../../common/interfaces/pagination.interface';
-import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '../../common/constants';
-import { UserRole } from '../users/entities/user.entity';
+import { Role } from '../../common/constants/role.enum';
 
 @Injectable()
 export class ReviewsService {
@@ -23,164 +15,99 @@ export class ReviewsService {
     private productsService: ProductsService,
   ) {}
 
-  async findAll(
-    options: PaginationOptions,
-    productId?: number,
-    userId?: number
-  ): Promise<PaginatedResult<Review>> {
-    const page = options.page || 1;
-    const limit = Math.min(options.limit || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
+  async create(userId: string, createReviewDto: CreateReviewDto): Promise<Review> {
+    // Check if product exists
+    const product = await this.productsService.findOne(createReviewDto.productId);
     
-    // Build query conditions
-    const whereConditions: any = {};
-    
-    if (productId) {
-      whereConditions.productId = productId;
-    }
-    
-    if (userId) {
-      whereConditions.userId = userId;
-    }
-    
-    const [reviews, total] = await this.reviewsRepository.findAndCount({
-      where: whereConditions,
-      order: { createdAt: 'DESC' },
-      take: limit,
-      skip: (page - 1) * limit,
-      relations: ['user', 'product'],
-    });
-    
-    const totalPages = Math.ceil(total / limit);
-    
-    return {
-      data: reviews,
-      meta: {
-        total,
-        page,
-        limit,
-        totalPages,
-        hasNextPage: page < totalPages,
-        hasPreviousPage: page > 1,
-      },
-    };
-  }
-
-  async findAllForProduct(
-    productId: number,
-    options: PaginationOptions
-  ): Promise<PaginatedResult<Review>> {
-    // Verify product exists
-    await this.productsService.findOne(productId);
-    
-    const page = options.page || 1;
-    const limit = Math.min(options.limit || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
-    
-    const [reviews, total] = await this.reviewsRepository.findAndCount({
-      where: { productId, isVisible: true },
-      order: { createdAt: 'DESC' },
-      take: limit,
-      skip: (page - 1) * limit,
-      relations: ['user'],
-    });
-    
-    const totalPages = Math.ceil(total / limit);
-    
-    return {
-      data: reviews,
-      meta: {
-        total,
-        page,
-        limit,
-        totalPages,
-        hasNextPage: page < totalPages,
-        hasPreviousPage: page > 1,
-      },
-    };
-  }
-
-  async findOne(id: number): Promise<Review> {
-    const review = await this.reviewsRepository.findOne({
-      where: { id },
-      relations: ['user', 'product'],
-    });
-    
-    if (!review) {
-      throw new NotFoundException(`Review with ID ${id} not found`);
-    }
-    
-    return review;
-  }
-
-  async create(createReviewDto: CreateReviewDto, userId: number): Promise<Review> {
-    const { productId } = createReviewDto;
-    
-    // Verify product exists
-    await this.productsService.findOne(productId);
-    
-    // Check if user has already reviewed this product
+    // Check if user already reviewed this product
     const existingReview = await this.reviewsRepository.findOne({
-      where: { userId, productId },
+      where: { userId, productId: createReviewDto.productId },
     });
     
     if (existingReview) {
-      throw new ConflictException('You have already reviewed this product');
+      throw new BadRequestException('You have already reviewed this product');
     }
     
-    // Create review
+    // Create the review
     const review = this.reviewsRepository.create({
-      ...createReviewDto,
       userId,
+      productId: createReviewDto.productId,
+      rating: createReviewDto.rating,
+      comment: createReviewDto.comment,
+      imageUrl: createReviewDto.imageUrl,
     });
     
     const savedReview = await this.reviewsRepository.save(review);
     
-    // Update product rating
-    await this.productsService.updateProductRating(productId);
+    // Update product average rating
+    await this.productsService.updateRating(product.id);
     
     return savedReview;
   }
 
-  async update(
-    id: number, 
-    updateReviewDto: UpdateReviewDto, 
-    userId: number,
-    userRole: UserRole
-  ): Promise<Review> {
+  async findAllByProduct(productId: string): Promise<Review[]> {
+    // Verify product exists
+    await this.productsService.findOne(productId);
+    
+    return this.reviewsRepository.find({
+      where: { productId, isPublished: true },
+      relations: ['user'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async findOne(id: string): Promise<Review> {
+    const review = await this.reviewsRepository.findOne({
+      where: { id },
+      relations: ['user', 'product'],
+    });
+
+    if (!review) {
+      throw new NotFoundException(`Review with ID ${id} not found`);
+    }
+
+    return review;
+  }
+
+  async update(id: string, userId: string, userRole: Role, updateReviewDto: UpdateReviewDto): Promise<Review> {
     const review = await this.findOne(id);
     
-    // Check if user is allowed to update (owner or admin)
-    if (review.userId !== userId && userRole !== UserRole.ADMIN) {
+    // Only the review owner or admin can update the review
+    if (review.userId !== userId && userRole !== Role.ADMIN) {
       throw new ForbiddenException('You do not have permission to update this review');
     }
     
-    // Update review
-    const updatedReview = await this.reviewsRepository.save({
-      ...review,
-      ...updateReviewDto,
-    });
+    // Regular users cannot update isPublished
+    if (updateReviewDto.isPublished !== undefined && userRole !== Role.ADMIN) {
+      delete updateReviewDto.isPublished;
+    }
     
-    // Update product rating if rating changed
+    // Update the review
+    Object.assign(review, updateReviewDto);
+    
+    const updatedReview = await this.reviewsRepository.save(review);
+    
+    // Update product average rating if rating changed
     if (updateReviewDto.rating) {
-      await this.productsService.updateProductRating(review.productId);
+      await this.productsService.updateRating(review.productId);
     }
     
     return updatedReview;
   }
 
-  async remove(id: number, userId: number, userRole: UserRole): Promise<{ message: string }> {
+  async remove(id: string, userId: string, userRole: Role): Promise<void> {
     const review = await this.findOne(id);
     
-    // Check if user is allowed to delete (owner or admin)
-    if (review.userId !== userId && userRole !== UserRole.ADMIN) {
+    // Only the review owner or admin can delete the review
+    if (review.userId !== userId && userRole !== Role.ADMIN) {
       throw new ForbiddenException('You do not have permission to delete this review');
     }
     
-    // Delete review
+    const productId = review.productId;
+    
     await this.reviewsRepository.remove(review);
     
-    // Update product rating
-    await this.productsService.updateProductRating(review.productId);
-    
-    return { message: 'Review deleted successfully' };
+    // Update product average rating
+    await this.productsService.updateRating(productId);
   }
 }

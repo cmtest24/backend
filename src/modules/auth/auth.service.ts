@@ -1,199 +1,168 @@
-import { 
-  Injectable, 
-  ConflictException, 
-  UnauthorizedException, 
-  BadRequestException,
-  NotFoundException
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
-import { v4 as uuidv4 } from 'uuid';
-import { User, UserStatus } from '../users/entities/user.entity';
-import { RegisterDto } from './dto/register.dto';
+import { ConfigService } from '@nestjs/config';
+import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
-import { SocialLoginDto } from './dto/social-login.dto';
+import { RegisterDto } from './dto/register.dto';
+import { PasswordUtil } from '../../common/utils/password.util';
+import { User } from '../users/entities/user.entity';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User)
-    private usersRepository: Repository<User>,
+    private usersService: UsersService,
     private jwtService: JwtService,
+    private configService: ConfigService,
   ) {}
 
   async register(registerDto: RegisterDto) {
-    const { email, password, fullName, phone } = registerDto;
+    try {
+      const user = await this.usersService.create({
+        fullName: registerDto.fullName,
+        email: registerDto.email,
+        password: registerDto.password,
+        phoneNumber: registerDto.phoneNumber,
+      });
 
-    // Check if user exists
-    const existingUser = await this.usersRepository.findOne({ where: { email } });
-    if (existingUser) {
-      throw new ConflictException('Email already exists');
+      // Remove password from response
+      const { password, ...result } = user;
+      
+      return {
+        user: result,
+        message: 'Registration successful',
+      };
+    } catch (error) {
+      if (error instanceof ConflictException) {
+        throw error;
+      }
+      throw new BadRequestException('Could not register user');
     }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create new user
-    const user = this.usersRepository.create({
-      email,
-      password: hashedPassword,
-      fullName,
-      phone,
-      status: UserStatus.ACTIVE,
-    });
-
-    await this.usersRepository.save(user);
-
-    // Remove password from response
-    const { password: _, ...result } = user;
-    
-    return {
-      ...result,
-      access_token: this.generateToken(user),
-    };
   }
 
   async login(loginDto: LoginDto) {
-    const { email, password } = loginDto;
+    try {
+      const user = await this.usersService.findByEmail(loginDto.email);
+      const isPasswordValid = await PasswordUtil.compare(loginDto.password, user.password);
 
-    // Find user with password included
-    const user = await this.usersRepository.findOne({ 
-      where: { email },
-      select: ['id', 'email', 'password', 'fullName', 'role', 'status']
-    });
+      if (!isPasswordValid) {
+        throw new UnauthorizedException('Invalid credentials');
+      }
 
-    if (!user) {
+      return this.generateTokenResponse(user);
+    } catch (error) {
       throw new UnauthorizedException('Invalid credentials');
     }
-
-    if (user.status !== UserStatus.ACTIVE) {
-      throw new UnauthorizedException('Account is inactive or banned');
-    }
-
-    // Check password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    // Remove password from response
-    const { password: _, ...result } = user;
-    
-    return {
-      ...result,
-      access_token: this.generateToken(user),
-    };
   }
 
-  async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
-    const { email } = forgotPasswordDto;
-    
-    const user = await this.usersRepository.findOne({ where: { email } });
-    if (!user) {
-      // Don't reveal that email doesn't exist
-      return { message: 'If your email is registered, you will receive a password reset link' };
-    }
-
-    // Generate reset token and expiry
-    const resetToken = uuidv4();
-    const resetPasswordExpires = new Date();
-    resetPasswordExpires.setHours(resetPasswordExpires.getHours() + 1); // Token valid for 1 hour
-
-    // Update user with reset token
-    user.resetPasswordToken = resetToken;
-    user.resetPasswordExpires = resetPasswordExpires;
-    await this.usersRepository.save(user);
-
-    // In production, send email with reset link
-    // For now, just return the token
-    return { 
-      message: 'If your email is registered, you will receive a password reset link',
-      // In development only, return the token
-      resetToken, 
-    };
-  }
-
-  async resetPassword(resetPasswordDto: ResetPasswordDto) {
-    const { token, password } = resetPasswordDto;
-
-    const user = await this.usersRepository.findOne({ 
-      where: { resetPasswordToken: token } 
-    });
-
-    if (!user || !user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
-      throw new BadRequestException('Invalid or expired reset token');
-    }
-
-    // Hash new password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Update user password and clear reset token
-    user.password = hashedPassword;
-    user.resetPasswordToken = null;
-    user.resetPasswordExpires = null;
-    await this.usersRepository.save(user);
-
-    return { message: 'Password has been reset successfully' };
-  }
-
-  async socialLogin(socialLoginDto: SocialLoginDto) {
-    const { provider, accessToken, userData } = socialLoginDto;
-    
-    // In a real implementation, you would verify the access token
-    // with the respective social provider
-    
-    // For demo purposes, we'll assume the token is valid and use the provided user data
-    
-    // Check if user exists with this social ID
-    let user = await this.usersRepository.findOne({ 
-      where: { 
-        socialProvider: provider,
-        socialId: userData.id
-      } 
-    });
-    
-    if (!user) {
-      // Check if email already exists
-      const existingUserByEmail = await this.usersRepository.findOne({
-        where: { email: userData.email }
+  async forgotPassword(email: string) {
+    try {
+      const user = await this.usersService.findByEmail(email);
+      
+      // Generate reset token
+      const resetToken = randomBytes(32).toString('hex');
+      const resetExpires = new Date();
+      resetExpires.setHours(resetExpires.getHours() + 1); // Token valid for 1 hour
+      
+      // Save token to user
+      await this.usersService.update(user.id, {
+        resetPasswordToken: resetToken,
+        resetPasswordExpires: resetExpires,
       });
       
-      if (existingUserByEmail) {
-        // Link social account to existing email
-        existingUserByEmail.socialId = userData.id;
-        existingUserByEmail.socialProvider = provider;
-        user = await this.usersRepository.save(existingUserByEmail);
-      } else {
-        // Create new user
-        const newUser = this.usersRepository.create({
-          email: userData.email,
-          fullName: userData.name,
-          socialId: userData.id,
-          socialProvider: provider,
-          status: UserStatus.ACTIVE,
-        });
-        
-        user = await this.usersRepository.save(newUser);
-      }
+      // Here you would send an email with the reset token
+      // For now, just return the token (in a real app this should be emailed)
+      
+      return {
+        message: 'Password reset email sent',
+        // Include token here only for testing, remove in production
+        resetToken,
+      };
+    } catch (error) {
+      // Don't reveal whether the email exists or not
+      return {
+        message: 'Password reset email sent if the email exists',
+      };
     }
-    
-    return {
-      user: {
-        id: user.id,
-        email: user.email,
-        fullName: user.fullName,
-        role: user.role,
-      },
-      access_token: this.generateToken(user),
-    };
   }
 
-  private generateToken(user: User) {
-    const payload = { email: user.email, sub: user.id, role: user.role };
-    return this.jwtService.sign(payload);
+  async resetPassword(token: string, newPassword: string) {
+    try {
+      // Find user with this reset token and valid expiration
+      const user = await this.findUserByResetToken(token);
+      
+      // Hash the new password
+      const hashedPassword = await PasswordUtil.hash(newPassword);
+      
+      // Update the user's password and clear the reset token
+      await this.usersService.update(user.id, {
+        password: hashedPassword,
+        resetPasswordToken: null,
+        resetPasswordExpires: null,
+      });
+      
+      return {
+        message: 'Password reset successful',
+      };
+    } catch (error) {
+      throw new BadRequestException('Invalid or expired password reset token');
+    }
+  }
+
+  private async findUserByResetToken(token: string): Promise<User> {
+    const users = await this.usersService.findAll();
+    
+    const user = users.find(
+      u => u.resetPasswordToken === token && 
+      u.resetPasswordExpires > new Date()
+    );
+    
+    if (!user) {
+      throw new BadRequestException('Invalid or expired password reset token');
+    }
+    
+    return user;
+  }
+
+  async socialLogin(socialData: any) {
+    // This is a simplified implementation
+    // In a real app, you would verify the token with the social provider
+    
+    try {
+      let user: User;
+      
+      // Try to find user by email
+      try {
+        user = await this.usersService.findByEmail(socialData.email);
+      } catch (error) {
+        // If user doesn't exist, create a new one
+        user = await this.usersService.create({
+          email: socialData.email,
+          fullName: socialData.name,
+          password: randomBytes(16).toString('hex'), // Generate random password
+          avatarUrl: socialData.picture,
+        });
+      }
+      
+      return this.generateTokenResponse(user);
+    } catch (error) {
+      throw new BadRequestException('Could not authenticate with social provider');
+    }
+  }
+
+  private generateTokenResponse(user: User) {
+    const payload = { 
+      sub: user.id, 
+      email: user.email,
+      role: user.role 
+    };
+    
+    const { password, resetPasswordToken, resetPasswordExpires, ...result } = user;
+    
+    return {
+      user: result,
+      accessToken: this.jwtService.sign(payload),
+      expiresIn: this.configService.get('jwt.expiresIn'),
+    };
   }
 }

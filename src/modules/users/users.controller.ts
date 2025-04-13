@@ -1,104 +1,86 @@
-import { 
-  Controller, 
-  Get, 
-  Put, 
-  Param, 
-  Body, 
-  Delete, 
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Put,
+  Param,
+  Delete,
   UseGuards,
-  Req,
-  Query,
-  ParseIntPipe
+  Request,
 } from '@nestjs/common';
-import { 
-  ApiBearerAuth, 
-  ApiTags, 
-  ApiOperation, 
-  ApiResponse,
-  ApiQuery 
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from './users.service';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
-import { UserRole } from './entities/user.entity';
-import { PaginationOptions } from '../../common/interfaces/pagination.interface';
+import { Role } from '../../common/constants/role.enum';
 
-@ApiTags('Users')
+@ApiTags('users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current user profile' })
-  @ApiResponse({ status: 200, description: 'Return the user profile.' })
-  async getProfile(@Req() req) {
-    const userId = req.user.id;
-    return this.usersService.findOne(userId);
+  @ApiResponse({ status: 200, description: 'Return the current user profile' })
+  @ApiBearerAuth()
+  getProfile(@Request() req) {
+    return req.user;
   }
 
   @Put('me')
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Update current user profile' })
-  @ApiResponse({ status: 200, description: 'User updated successfully.' })
-  async updateProfile(@Req() req, @Body() updateUserDto: UpdateUserDto) {
-    const userId = req.user.id;
-    return this.usersService.update(userId, updateUserDto);
+  @ApiResponse({ status: 200, description: 'User profile updated successfully' })
+  @ApiBearerAuth()
+  updateProfile(@Request() req, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.update(req.user.id, updateUserDto);
   }
 
-  // Admin endpoints
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Get all users (admin only)' })
+  @ApiResponse({ status: 200, description: 'Return all users' })
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get all users (admin)' })
-  @ApiResponse({ status: 200, description: 'Return all users.' })
-  @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiQuery({ name: 'sortBy', required: false, type: String })
-  @ApiQuery({ name: 'order', required: false, enum: ['ASC', 'DESC'] })
-  async findAll(@Query() paginationOptions: PaginationOptions) {
-    return this.usersService.findAll(paginationOptions);
+  findAll() {
+    return this.usersService.findAll();
   }
 
   @Get(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Get user by id (admin only)' })
+  @ApiResponse({ status: 200, description: 'Return the user' })
+  @ApiResponse({ status: 404, description: 'User not found' })
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get user by ID (admin)' })
-  @ApiResponse({ status: 200, description: 'Return the user.' })
-  @ApiResponse({ status: 404, description: 'User not found.' })
-  async findOne(@Param('id', ParseIntPipe) id: number) {
+  findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
   }
 
   @Put(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Update user (admin only)' })
+  @ApiResponse({ status: 200, description: 'User updated successfully' })
+  @ApiResponse({ status: 404, description: 'User not found' })
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Update user (admin)' })
-  @ApiResponse({ status: 200, description: 'User updated successfully.' })
-  @ApiResponse({ status: 404, description: 'User not found.' })
-  async update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateUserDto: UpdateUserDto,
-  ) {
+  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(id, updateUserDto);
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Delete user (admin only)' })
+  @ApiResponse({ status: 200, description: 'User deleted successfully' })
+  @ApiResponse({ status: 404, description: 'User not found' })
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Delete user (admin)' })
-  @ApiResponse({ status: 200, description: 'User deleted successfully.' })
-  @ApiResponse({ status: 404, description: 'User not found.' })
-  async remove(@Param('id', ParseIntPipe) id: number) {
+  remove(@Param('id') id: string) {
     return this.usersService.remove(id);
   }
 }

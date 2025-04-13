@@ -1,66 +1,44 @@
-import { 
-  IsOptional, 
-  IsString, 
-  IsBoolean, 
-  MaxLength 
-} from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsString, IsOptional, IsBoolean } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateAddressDto {
-  @ApiProperty({ example: 'Nguyen Van A', required: false })
+  @ApiPropertyOptional({ description: 'Full name of the recipient' })
   @IsOptional()
   @IsString()
-  @MaxLength(100)
   fullName?: string;
 
-  @ApiProperty({ example: '+84123456789', required: false })
+  @ApiPropertyOptional({ description: 'Phone number of the recipient' })
   @IsOptional()
   @IsString()
-  phone?: string;
+  phoneNumber?: string;
 
-  @ApiProperty({ example: '123 Main Street', required: false })
+  @ApiPropertyOptional({ description: 'Street address including house/apartment number' })
   @IsOptional()
   @IsString()
-  @MaxLength(255)
-  addressLine1?: string;
+  street?: string;
 
-  @ApiProperty({ example: 'Apartment 4B', required: false })
+  @ApiPropertyOptional({ description: 'Ward/community' })
   @IsOptional()
   @IsString()
-  @MaxLength(255)
-  addressLine2?: string;
-
-  @ApiProperty({ example: 'Ho Chi Minh City', required: false })
-  @IsOptional()
-  @IsString()
-  @MaxLength(100)
-  city?: string;
-
-  @ApiProperty({ example: 'District 1', required: false })
-  @IsOptional()
-  @IsString()
-  @MaxLength(100)
-  district?: string;
-
-  @ApiProperty({ example: 'Ben Nghe Ward', required: false })
-  @IsOptional()
-  @IsString()
-  @MaxLength(100)
   ward?: string;
 
-  @ApiProperty({ example: '70000', required: false })
+  @ApiPropertyOptional({ description: 'District' })
   @IsOptional()
   @IsString()
-  @MaxLength(20)
-  postalCode?: string;
+  district?: string;
 
-  @ApiProperty({ example: true, required: false })
+  @ApiPropertyOptional({ description: 'City/province' })
+  @IsOptional()
+  @IsString()
+  city?: string;
+
+  @ApiPropertyOptional({ description: 'Postal/zip code' })
+  @IsOptional()
+  @IsString()
+  zipCode?: string;
+
+  @ApiPropertyOptional({ description: 'Set as default address' })
   @IsOptional()
   @IsBoolean()
   isDefault?: boolean;
-
-  @ApiProperty({ example: 'Call before delivery', required: false })
-  @IsOptional()
-  @IsString()
-  notes?: string;
 }

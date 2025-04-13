@@ -1,51 +1,39 @@
-import { 
-  Controller, 
-  Post, 
-  Get, 
-  Body, 
-  Param, 
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
   UseGuards,
-  Req,
-  ParseIntPipe,
-  Query
+  Request,
 } from '@nestjs/common';
-import { 
-  ApiBearerAuth, 
-  ApiTags, 
-  ApiOperation, 
-  ApiResponse 
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { PaymentsService } from './payments.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 
-@ApiTags('Payments')
+@ApiTags('payments')
 @Controller('payments')
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Create a new payment' })
+  @ApiResponse({ status: 201, description: 'Payment created successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid input' })
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Create a payment' })
-  @ApiResponse({ status: 201, description: 'Payment created successfully.' })
-  @ApiResponse({ status: 404, description: 'Order not found.' })
-  create(@Body() createPaymentDto: CreatePaymentDto, @Req() req) {
-    return this.paymentsService.create(createPaymentDto, req.user.id);
+  create(@Request() req, @Body() createPaymentDto: CreatePaymentDto) {
+    return this.paymentsService.create(req.user.id, createPaymentDto);
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get payment status' })
-  @ApiResponse({ status: 200, description: 'Return the payment status.' })
-  @ApiResponse({ status: 404, description: 'Payment not found.' })
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  @ApiResponse({ status: 200, description: 'Return the payment status' })
+  @ApiResponse({ status: 404, description: 'Payment not found' })
+  @ApiBearerAuth()
+  findOne(@Param('id') id: string) {
     return this.paymentsService.findOne(id);
-  }
-  
-  // Callback from payment provider
-  @Get('callback')
-  @ApiOperation({ summary: 'Payment callback from provider' })
-  handleCallback(@Query() query: any) {
-    return this.paymentsService.handlePaymentCallback(query);
   }
 }

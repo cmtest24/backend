@@ -1,41 +1,44 @@
-import { 
-  IsOptional, 
-  IsString, 
-  IsEnum, 
-  IsArray 
-} from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
-import { PostStatus } from '../entities/post.entity';
+import { IsString, IsOptional, IsBoolean, IsArray } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdatePostDto {
-  @ApiProperty({ example: 'Updated: Top 10 Herbal Remedies for Common Ailments', required: false })
+  @ApiPropertyOptional({ description: 'Title of the blog post' })
   @IsOptional()
   @IsString()
   title?: string;
 
-  @ApiProperty({ example: 'Updated content with more information...', required: false })
+  @ApiPropertyOptional({ description: 'URL-friendly slug for the post' })
+  @IsOptional()
+  @IsString()
+  slug?: string;
+
+  @ApiPropertyOptional({ description: 'Full content of the post in HTML/Markdown' })
   @IsOptional()
   @IsString()
   content?: string;
 
-  @ApiProperty({ example: 'Updated excerpt with new information.', required: false })
+  @ApiPropertyOptional({ description: 'Short summary of the post' })
   @IsOptional()
   @IsString()
-  excerpt?: string;
+  summary?: string;
 
-  @ApiProperty({ example: 'https://example.com/new-featured-image.jpg', required: false })
+  @ApiPropertyOptional({ description: 'URL to the featured image' })
   @IsOptional()
   @IsString()
-  featuredImage?: string;
+  imageUrl?: string;
 
-  @ApiProperty({ enum: PostStatus, example: PostStatus.PUBLISHED, required: false })
+  @ApiPropertyOptional({ description: 'Whether the post is published' })
   @IsOptional()
-  @IsEnum(PostStatus)
-  status?: PostStatus;
+  @IsBoolean()
+  isPublished?: boolean;
 
-  @ApiProperty({ example: ['herbal', 'remedies', 'natural-health', 'new-tag'], required: false })
+  @ApiPropertyOptional({ description: 'Tags associated with the post' })
   @IsOptional()
   @IsArray()
-  @IsString({ each: true })
   tags?: string[];
+
+  @ApiPropertyOptional({ description: 'Name of the post author' })
+  @IsOptional()
+  @IsString()
+  authorName?: string;
 }

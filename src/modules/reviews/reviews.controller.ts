@@ -1,108 +1,71 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Put, 
-  Delete, 
-  Body, 
-  Param, 
-  Query, 
-  UseGuards, 
-  Req,
-  ParseIntPipe
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Put,
+  Param,
+  Delete,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
-import { 
-  ApiBearerAuth, 
-  ApiTags, 
-  ApiOperation, 
-  ApiResponse,
-  ApiQuery
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../common/guards/roles.guard';
-import { Roles } from '../../common/decorators/roles.decorator';
-import { UserRole } from '../users/entities/user.entity';
 
-@ApiTags('Reviews')
+@ApiTags('reviews')
 @Controller()
 export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
-  @Get('products/:id/reviews')
-  @ApiOperation({ summary: 'Get reviews for a product' })
-  @ApiResponse({ status: 200, description: 'Return all reviews for the product.' })
-  @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'limit', required: false, type: Number })
-  findAllForProduct(
-    @Param('id', ParseIntPipe) productId: number,
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
-  ) {
-    return this.reviewsService.findAllForProduct(productId, { page, limit });
-  }
-
   @Post('products/:id/reviews')
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Create a product review' })
+  @ApiResponse({ status: 201, description: 'Review created successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request or already reviewed' })
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Create a review for a product' })
-  @ApiResponse({ status: 201, description: 'Review created successfully.' })
-  @ApiResponse({ status: 400, description: 'Invalid input or user has already reviewed this product.' })
-  @ApiResponse({ status: 404, description: 'Product not found.' })
   create(
-    @Param('id', ParseIntPipe) productId: number,
+    @Request() req,
+    @Param('id') productId: string,
     @Body() createReviewDto: CreateReviewDto,
-    @Req() req,
   ) {
+    // Ensure productId is set correctly
     createReviewDto.productId = productId;
-    return this.reviewsService.create(createReviewDto, req.user.id);
+    return this.reviewsService.create(req.user.id, createReviewDto);
+  }
+
+  @Get('products/:id/reviews')
+  @ApiOperation({ summary: 'Get all reviews for a product' })
+  @ApiResponse({ status: 200, description: 'Return product reviews' })
+  findAllByProduct(@Param('id') productId: string) {
+    return this.reviewsService.findAllByProduct(productId);
   }
 
   @Put('reviews/:id')
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a review' })
-  @ApiResponse({ status: 200, description: 'Review updated successfully.' })
-  @ApiResponse({ status: 404, description: 'Review not found.' })
-  @ApiResponse({ status: 403, description: 'Not allowed to update this review.' })
+  @ApiResponse({ status: 200, description: 'Review updated successfully' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 404, description: 'Review not found' })
+  @ApiBearerAuth()
   update(
-    @Param('id', ParseIntPipe) id: number,
+    @Request() req,
+    @Param('id') id: string,
     @Body() updateReviewDto: UpdateReviewDto,
-    @Req() req,
   ) {
-    return this.reviewsService.update(id, updateReviewDto, req.user.id, req.user.role);
+    return this.reviewsService.update(id, req.user.id, req.user.role, updateReviewDto);
   }
 
   @Delete('reviews/:id')
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete a review' })
-  @ApiResponse({ status: 200, description: 'Review deleted successfully.' })
-  @ApiResponse({ status: 404, description: 'Review not found.' })
-  @ApiResponse({ status: 403, description: 'Not allowed to delete this review.' })
-  remove(@Param('id', ParseIntPipe) id: number, @Req() req) {
-    return this.reviewsService.remove(id, req.user.id, req.user.role);
-  }
-
-  // Admin endpoints
-  @Get('admin/reviews')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @ApiResponse({ status: 200, description: 'Review deleted successfully' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 404, description: 'Review not found' })
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get all reviews (admin)' })
-  @ApiResponse({ status: 200, description: 'Return all reviews.' })
-  @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiQuery({ name: 'productId', required: false, type: Number })
-  @ApiQuery({ name: 'userId', required: false, type: Number })
-  findAll(
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
-    @Query('productId') productId?: number,
-    @Query('userId') userId?: number,
-  ) {
-    return this.reviewsService.findAll({ page, limit }, productId, userId);
+  remove(@Request() req, @Param('id') id: string) {
+    return this.reviewsService.remove(id, req.user.id, req.user.role);
   }
 }

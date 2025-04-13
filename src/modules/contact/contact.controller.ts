@@ -1,68 +1,76 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Put, 
-  Body, 
-  Param, 
-  UseGuards, 
-  Query,
-  ParseIntPipe
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  UseGuards,
+  Put,
 } from '@nestjs/common';
-import { 
-  ApiBearerAuth, 
-  ApiTags, 
-  ApiOperation, 
-  ApiResponse,
-  ApiQuery 
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ContactService } from './contact.service';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
-import { UserRole } from '../users/entities/user.entity';
-import { PaginationOptions } from '../../common/interfaces/pagination.interface';
+import { Role } from '../../common/constants/role.enum';
 
-@ApiTags('Contact')
+@ApiTags('contact')
 @Controller('contact')
 export class ContactController {
   constructor(private readonly contactService: ContactService) {}
 
   @Post()
   @ApiOperation({ summary: 'Submit a contact form' })
-  @ApiResponse({ status: 201, description: 'Contact form submitted successfully.' })
+  @ApiResponse({ status: 201, description: 'Contact form submitted successfully' })
   create(@Body() createContactDto: CreateContactDto) {
     return this.contactService.create(createContactDto);
   }
 
-  // Admin endpoints
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Get all contact submissions (admin only)' })
+  @ApiResponse({ status: 200, description: 'Return all contact submissions' })
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get all contacts (admin)' })
-  @ApiResponse({ status: 200, description: 'Return all contacts.' })
-  @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiQuery({ name: 'status', required: false, type: String })
-  @ApiQuery({ name: 'search', required: false, type: String })
-  findAll(
-    @Query() paginationOptions: PaginationOptions,
-    @Query('status') status?: string,
-    @Query('search') search?: string,
-  ) {
-    return this.contactService.findAll(paginationOptions, status, search);
+  findAll() {
+    return this.contactService.findAll();
   }
 
   @Put(':id/read')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Mark contact as read (admin only)' })
+  @ApiResponse({ status: 200, description: 'Contact marked as read' })
+  @ApiResponse({ status: 404, description: 'Contact not found' })
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Mark contact as read (admin)' })
-  @ApiResponse({ status: 200, description: 'Contact marked as read.' })
-  @ApiResponse({ status: 404, description: 'Contact not found.' })
-  markAsRead(@Param('id', ParseIntPipe) id: number) {
+  markAsRead(@Param('id') id: string) {
     return this.contactService.markAsRead(id);
+  }
+  
+  @Put(':id/replied')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Mark contact as replied with notes (admin only)' })
+  @ApiResponse({ status: 200, description: 'Contact marked as replied' })
+  @ApiResponse({ status: 404, description: 'Contact not found' })
+  @ApiBearerAuth()
+  markAsReplied(
+    @Param('id') id: string,
+    @Body('adminNotes') adminNotes: string,
+  ) {
+    return this.contactService.markAsReplied(id, adminNotes);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Delete a contact submission (admin only)' })
+  @ApiResponse({ status: 200, description: 'Contact deleted successfully' })
+  @ApiResponse({ status: 404, description: 'Contact not found' })
+  @ApiBearerAuth()
+  remove(@Param('id') id: string) {
+    return this.contactService.delete(id);
   }
 }

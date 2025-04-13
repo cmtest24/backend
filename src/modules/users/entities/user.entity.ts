@@ -1,27 +1,23 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import { 
+  Entity, 
+  PrimaryGeneratedColumn, 
+  Column, 
+  CreateDateColumn, 
+  UpdateDateColumn, 
+  OneToMany 
+} from 'typeorm';
 import { Exclude } from 'class-transformer';
+import { Role } from '../../../common/constants/role.enum';
 import { Address } from '../../addresses/entities/address.entity';
 import { Order } from '../../orders/entities/order.entity';
-import { Review } from '../../reviews/entities/review.entity';
 import { CartItem } from '../../cart/entities/cart-item.entity';
+import { Review } from '../../reviews/entities/review.entity';
 import { Wishlist } from '../../wishlist/entities/wishlist.entity';
-import { Post } from '../../posts/entities/post.entity';
-
-export enum UserRole {
-  USER = 'user',
-  ADMIN = 'admin',
-}
-
-export enum UserStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  BANNED = 'banned',
-}
 
 @Entity('users')
 export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ length: 100 })
   fullName: string;
@@ -29,29 +25,25 @@ export class User {
   @Column({ unique: true })
   email: string;
 
-  @Column({ nullable: true, unique: true })
-  phone: string;
+  @Column({ nullable: true })
+  phoneNumber: string;
 
   @Exclude()
-  @Column({ select: false })
+  @Column()
   password: string;
 
   @Column({
     type: 'enum',
-    enum: UserRole,
-    default: UserRole.USER,
+    enum: Role,
+    default: Role.USER,
   })
-  role: UserRole;
-
-  @Column({
-    type: 'enum',
-    enum: UserStatus,
-    default: UserStatus.ACTIVE,
-  })
-  status: UserStatus;
+  role: Role;
 
   @Column({ nullable: true })
-  avatar: string;
+  avatarUrl: string;
+
+  @Column({ default: false })
+  isEmailVerified: boolean;
 
   @Column({ nullable: true })
   resetPasswordToken: string;
@@ -59,34 +51,24 @@ export class User {
   @Column({ nullable: true })
   resetPasswordExpires: Date;
 
-  @Column({ nullable: true })
-  socialId: string;
-
-  @Column({ nullable: true })
-  socialProvider: string;
-
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
 
-  // Relationships
-  @OneToMany(() => Address, address => address.user)
+  @OneToMany(() => Address, (address) => address.user)
   addresses: Address[];
 
-  @OneToMany(() => Order, order => order.user)
+  @OneToMany(() => Order, (order) => order.user)
   orders: Order[];
 
-  @OneToMany(() => Review, review => review.user)
-  reviews: Review[];
-
-  @OneToMany(() => CartItem, cartItem => cartItem.user)
+  @OneToMany(() => CartItem, (cartItem) => cartItem.user)
   cartItems: CartItem[];
 
-  @OneToMany(() => Wishlist, wishlist => wishlist.user)
-  wishlistItems: Wishlist[];
+  @OneToMany(() => Review, (review) => review.user)
+  reviews: Review[];
 
-  @OneToMany(() => Post, post => post.author)
-  posts: Post[];
+  @OneToMany(() => Wishlist, (wishlist) => wishlist.user)
+  wishlistItems: Wishlist[];
 }

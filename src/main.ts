@@ -5,32 +5,33 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
-  // Prefix all routes with /api
+
+  // Global prefix
   app.setGlobalPrefix('api');
   
   // Enable CORS
   app.enableCors();
-  
-  // Set up validation pipeline
+
+  // Global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
-      transform: true,
       forbidNonWhitelisted: true,
+      transform: true,
     }),
   );
-  
-  // Set up Swagger documentation
+
+  // Swagger documentation
   const config = new DocumentBuilder()
     .setTitle('Đông Y Pharmacy API')
-    .setDescription('The Đông Y Pharmacy API description')
+    .setDescription('The Đông Y Pharmacy REST API documentation')
     .setVersion('1.0')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
-  
+
+  // Start the server
   await app.listen(8000, '0.0.0.0');
   console.log(`Application is running on: ${await app.getUrl()}`);
 }

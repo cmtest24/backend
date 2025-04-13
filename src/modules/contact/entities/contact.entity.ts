@@ -1,25 +1,15 @@
 import { 
   Entity, 
-  Column, 
   PrimaryGeneratedColumn, 
+  Column, 
   CreateDateColumn, 
-  UpdateDateColumn,
-  Index 
+  UpdateDateColumn 
 } from 'typeorm';
 
-export enum ContactStatus {
-  UNREAD = 'unread',
-  READ = 'read',
-  REPLIED = 'replied',
-  SPAM = 'spam',
-}
-
 @Entity('contacts')
-@Index(['email'])
-@Index(['status'])
 export class Contact {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   name: string;
@@ -28,7 +18,7 @@ export class Contact {
   email: string;
 
   @Column({ nullable: true })
-  phone: string;
+  phoneNumber: string;
 
   @Column()
   subject: string;
@@ -36,21 +26,14 @@ export class Contact {
   @Column('text')
   message: string;
 
-  @Column({
-    type: 'enum',
-    enum: ContactStatus,
-    default: ContactStatus.UNREAD,
-  })
-  status: ContactStatus;
+  @Column({ default: false })
+  isRead: boolean;
 
-  @Column({ type: 'timestamp', nullable: true })
-  readAt: Date;
+  @Column({ default: false })
+  isReplied: boolean;
 
-  @Column({ type: 'timestamp', nullable: true })
-  repliedAt: Date;
-
-  @Column('text', { nullable: true })
-  notes: string;
+  @Column({ nullable: true })
+  adminNotes: string;
 
   @CreateDateColumn()
   createdAt: Date;

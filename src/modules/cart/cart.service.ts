@@ -1,141 +1,111 @@
-import { 
-  Injectable, 
-  NotFoundException, 
-  BadRequestException,
-  ForbiddenException
-} from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CartItem } from './entities/cart-item.entity';
 import { AddToCartDto } from './dto/add-to-cart.dto';
 import { UpdateCartItemDto } from './dto/update-cart-item.dto';
 import { ProductsService } from '../products/products.service';
-import { ProductStatus } from '../products/entities/product.entity';
 
 @Injectable()
 export class CartService {
   constructor(
     @InjectRepository(CartItem)
-    private cartItemRepository: Repository<CartItem>,
+    private cartItemsRepository: Repository<CartItem>,
     private productsService: ProductsService,
   ) {}
 
-  async findAllByUser(userId: number) {
-    const cartItems = await this.cartItemRepository.find({
-      where: { userId },
-      relations: ['product', 'product.category'],
-      order: { createdAt: 'DESC' },
-    });
-
-    // Calculate cart summary
-    let subtotal = 0;
-    let totalItems = 0;
-
-    cartItems.forEach(item => {
-      subtotal += item.product.price * item.quantity;
-      totalItems += item.quantity;
-    });
-
-    return {
-      items: cartItems,
-      summary: {
-        subtotal,
-        totalItems,
-        itemCount: cartItems.length,
-      },
-    };
-  }
-
-  async addToCart(addToCartDto: AddToCartDto, userId: number): Promise<CartItem> {
+  async addToCart(userId: string, addToCartDto: AddToCartDto): Promise<CartItem> {
     const { productId, quantity } = addToCartDto;
-
+    
     // Check if product exists and is available
     const product = await this.productsService.findOne(productId);
-
-    if (product.status !== ProductStatus.ACTIVE) {
+    
+    if (!product.isActive) {
       throw new BadRequestException('Product is not available');
     }
-
-    if (product.quantity < quantity) {
+    
+    if (product.stockQuantity < quantity) {
       throw new BadRequestException('Not enough stock available');
     }
-
-    // Check if product is already in cart
-    let cartItem = await this.cartItemRepository.findOne({
+    
+    // Check if item already in cart
+    let cartItem = await this.cartItemsRepository.findOne({
       where: { userId, productId },
+      relations: ['product'],
     });
-
+    
     if (cartItem) {
-      // Update existing cart item
+      // Update quantity if already in cart
       cartItem.quantity += quantity;
       
-      // Check if new quantity exceeds available stock
-      if (cartItem.quantity > product.quantity) {
-        throw new BadRequestException('Not enough stock available');
+      // Check if updated quantity exceeds stock
+      if (cartItem.quantity > product.stockQuantity) {
+        throw new BadRequestException('Requested quantity exceeds available stock');
       }
       
-      return this.cartItemRepository.save(cartItem);
-    } else {
-      // Create new cart item
-      cartItem = this.cartItemRepository.create({
-        userId,
-        productId,
-        quantity,
-      });
-      
-      return this.cartItemRepository.save(cartItem);
+      return this.cartItemsRepository.save(cartItem);
     }
+    
+    // Create new cart item
+    cartItem = this.cartItemsRepository.create({
+      userId,
+      productId,
+      quantity,
+    });
+    
+    return this.cartItemsRepository.save(cartItem);
   }
 
-  async updateCartItem(
-    itemId: number,
-    updateCartItemDto: UpdateCartItemDto,
-    userId: number,
-  ): Promise<CartItem> {
-    const { quantity } = updateCartItemDto;
+  async getCart(userId: string): Promise<{ items: CartItem[]; total: number }> {
+    const items = await this.cartItemsRepository.find({
+      where: { userId },
+      relations: ['product'],
+      order: { createdAt: 'DESC' },
+    });
+    
+    // Calculate total
+    const total = items.reduce((sum, item) => {
+      const itemPrice = item.product.salePrice || item.product.price;
+      return sum + (itemPrice * item.quantity);
+    }, 0);
+    
+    return { items, total };
+  }
 
-    // Find cart item
-    const cartItem = await this.findCartItemAndCheckOwnership(itemId, userId);
-
-    // Check if product has enough stock
+  async updateCartItem(userId: string, itemId: string, updateCartItemDto: UpdateCartItemDto): Promise<CartItem> {
+    const cartItem = await this.findCartItem(userId, itemId);
+    
+    // Check if requested quantity is available
     const product = await this.productsService.findOne(cartItem.productId);
     
-    if (product.status !== ProductStatus.ACTIVE) {
-      throw new BadRequestException('Product is not available');
+    if (updateCartItemDto.quantity > product.stockQuantity) {
+      throw new BadRequestException('Requested quantity exceeds available stock');
     }
-
-    if (product.quantity < quantity) {
-      throw new BadRequestException('Not enough stock available');
-    }
-
-    // Update cart item
-    cartItem.quantity = quantity;
-    return this.cartItemRepository.save(cartItem);
+    
+    // Update the cart item
+    cartItem.quantity = updateCartItemDto.quantity;
+    
+    return this.cartItemsRepository.save(cartItem);
   }
 
-  async removeFromCart(itemId: number, userId: number): Promise<{ message: string }> {
-    const cartItem = await this.findCartItemAndCheckOwnership(itemId, userId);
+  async removeCartItem(userId: string, itemId: string): Promise<void> {
+    const cartItem = await this.findCartItem(userId, itemId);
     
-    await this.cartItemRepository.remove(cartItem);
-    
-    return { message: 'Item removed from cart successfully' };
+    await this.cartItemsRepository.remove(cartItem);
   }
   
-  async clearCart(userId: number): Promise<void> {
-    await this.cartItemRepository.delete({ userId });
+  async clearCart(userId: string): Promise<void> {
+    await this.cartItemsRepository.delete({ userId });
   }
 
-  private async findCartItemAndCheckOwnership(itemId: number, userId: number): Promise<CartItem> {
-    const cartItem = await this.cartItemRepository.findOne({
-      where: { id: itemId },
+  private async findCartItem(userId: string, itemId: string): Promise<CartItem> {
+    const cartItem = await this.cartItemsRepository.findOne({
+      where: { id: itemId, userId },
+      relations: ['product'],
     });
     
     if (!cartItem) {
       throw new NotFoundException('Cart item not found');
-    }
-    
-    if (cartItem.userId !== userId) {
-      throw new ForbiddenException('You do not have permission to access this cart item');
     }
     
     return cartItem;

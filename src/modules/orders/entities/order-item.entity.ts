@@ -1,33 +1,23 @@
 import { 
   Entity, 
-  Column, 
   PrimaryGeneratedColumn, 
+  Column, 
   ManyToOne, 
-  JoinColumn,
-  Index 
+  JoinColumn 
 } from 'typeorm';
 import { Order } from './order.entity';
 import { Product } from '../../products/entities/product.entity';
 
 @Entity('order_items')
-@Index(['orderId'])
 export class OrderItem {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @ManyToOne(() => Order, order => order.items, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'orderId' })
-  order: Order;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
-  orderId: number;
-
-  @ManyToOne(() => Product, product => product.orderItems)
-  @JoinColumn({ name: 'productId' })
-  product: Product;
+  orderId: string;
 
   @Column()
-  productId: number;
+  productId: string;
 
   @Column()
   productName: string;
@@ -35,17 +25,17 @@ export class OrderItem {
   @Column('decimal', { precision: 10, scale: 2 })
   price: number;
 
-  @Column()
+  @Column('int')
   quantity: number;
 
   @Column('decimal', { precision: 10, scale: 2 })
   subtotal: number;
 
-  // Store the product SKU at the time of order
-  @Column({ nullable: true })
-  sku: string;
+  @ManyToOne(() => Order, (order) => order.items, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'orderId' })
+  order: Order;
 
-  // Store the product attributes at the time of order
-  @Column('simple-json', { nullable: true })
-  attributes: any;
+  @ManyToOne(() => Product, (product) => product.orderItems)
+  @JoinColumn({ name: 'productId' })
+  product: Product;
 }

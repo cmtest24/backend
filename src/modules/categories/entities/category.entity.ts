@@ -1,46 +1,34 @@
 import { 
   Entity, 
-  Column, 
   PrimaryGeneratedColumn, 
-  OneToMany, 
-  ManyToOne, 
-  JoinColumn,
-  CreateDateColumn,
+  Column, 
+  CreateDateColumn, 
   UpdateDateColumn,
-  Index
+  OneToMany
 } from 'typeorm';
 import { Product } from '../../products/entities/product.entity';
 
 @Entity('categories')
-@Index(['name'])
-@Index(['slug'], { unique: true })
 export class Category {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column()
-  name: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ unique: true })
-  slug: string;
+  name: string;
 
   @Column({ nullable: true })
   description: string;
 
   @Column({ nullable: true })
-  image: string;
+  imageUrl: string;
 
-  @Column({ nullable: true })
-  parentId: number;
+  @Column({ default: true })
+  isActive: boolean;
 
-  @ManyToOne(() => Category, category => category.children, { onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'parentId' })
-  parent: Category;
+  @Column({ default: 0 })
+  sortOrder: number;
 
-  @OneToMany(() => Category, category => category.parent)
-  children: Category[];
-
-  @OneToMany(() => Product, product => product.category)
+  @OneToMany(() => Product, (product) => product.category)
   products: Product[];
 
   @CreateDateColumn()

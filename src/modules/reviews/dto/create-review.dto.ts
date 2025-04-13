@@ -1,27 +1,26 @@
-import { IsNotEmpty, IsNumber, IsString, IsArray, IsOptional, Min, Max } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsString, IsInt, IsOptional, Min, Max } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateReviewDto {
-  @ApiProperty({ example: 1 })
+  @ApiProperty({ description: 'Product ID to review' })
   @IsNotEmpty()
-  @IsNumber()
-  productId: number;
+  @IsString()
+  productId: string;
 
-  @ApiProperty({ example: 5, minimum: 1, maximum: 5 })
+  @ApiProperty({ description: 'Rating from 1 to 5', minimum: 1, maximum: 5 })
   @IsNotEmpty()
-  @IsNumber()
+  @IsInt()
   @Min(1)
   @Max(5)
   rating: number;
 
-  @ApiProperty({ example: 'Great product, highly recommended!' })
+  @ApiProperty({ description: 'Review comment/feedback' })
   @IsNotEmpty()
   @IsString()
   comment: string;
 
-  @ApiProperty({ example: ['https://example.com/image1.jpg'], required: false })
+  @ApiPropertyOptional({ description: 'URL to review image' })
   @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  images?: string[];
+  @IsString()
+  imageUrl?: string;
 }
