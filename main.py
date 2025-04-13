@@ -2,7 +2,12 @@ import os
 import sys
 import requests
 import subprocess
+import logging
 from flask import Flask, request, jsonify, redirect
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
@@ -16,11 +21,61 @@ def start_nest_server():
         print(f"Error starting Redis: {e}")
 
     try:
-        # Start NestJS using ts-node-dev in a separate process
-        process = subprocess.Popen(['node', 'nest-entrypoint.js'])
-        print(f"Started NestJS server with PID {process.pid}")
+        # Check if node and nest-entrypoint.js exist
+        if not os.path.exists('nest-entrypoint.js'):
+            logger.error("nest-entrypoint.js does not exist")
+            
+        # Check if NestJS is installed
+        logger.debug("Checking installed packages")
+        npm_list = subprocess.run(['npm', 'list'], capture_output=True, text=True)
+        logger.debug(f"Installed packages: {npm_list.stdout}")
+        
+        # Start NestJS using node directly
+        nestjs_env = os.environ.copy()
+        # Ensure environment variables from Replit are passed to NestJS
+        logger.debug("Environment variables passed to NestJS:")
+        for key in ['PGHOST', 'DATABASE_URL', 'PGPASSWORD', 'PGUSER', 'PGPORT', 'PGDATABASE']:
+            if key in nestjs_env:
+                logger.debug(f"  {key}: [secret]")
+        
+        logger.debug("Starting NestJS with node nest-entrypoint.js")
+        process = subprocess.Popen(
+            ['node', 'nest-entrypoint.js'], 
+            env=nestjs_env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        logger.info(f"Started NestJS server with PID {process.pid}")
+        
+        # Create a better logging function
+        import threading
+        def log_output():
+            while process.poll() is None:  # While process is running
+                stdout_line = process.stdout.readline() if process.stdout else ""
+                if stdout_line:
+                    logger.info(f"[NestJS] {stdout_line.strip()}")
+                stderr_line = process.stderr.readline() if process.stderr else ""
+                if stderr_line:
+                    logger.error(f"[NestJS-ERR] {stderr_line.strip()}")
+            
+            # Log exit code when process terminates
+            exit_code = process.poll()
+            logger.warning(f"NestJS process exited with code {exit_code}")
+            
+            # Capture any remaining output
+            remaining_stdout, remaining_stderr = process.communicate()
+            if remaining_stdout:
+                logger.info(f"[NestJS-Final] {remaining_stdout}")
+            if remaining_stderr:
+                logger.error(f"[NestJS-Final-ERR] {remaining_stderr}")
+        
+        # Start logging in a separate thread
+        log_thread = threading.Thread(target=log_output)
+        log_thread.daemon = True
+        log_thread.start()
     except Exception as e:
-        print(f"Error starting NestJS server: {e}")
+        logger.exception(f"Error starting NestJS server: {e}")
 
 # Define API endpoint
 NEST_API_URL = "http://localhost:8000"
@@ -39,11 +94,13 @@ def index():
 def api_docs():
     return redirect(f"{NEST_API_URL}/api/docs")
 
+@app.route('/api', defaults={'path': ''})
 @app.route('/api/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH'])
 def proxy_api(path):
     try:
         # Forward the request to the NestJS server
         url = f"{NEST_API_URL}/api/{path}"
+        logger.debug(f"Proxying request to: {url}")
         
         # Forward all headers
         headers = {key: value for key, value in request.headers if key != 'Host'}
@@ -57,13 +114,35 @@ def proxy_api(path):
             cookies=request.cookies,
             params=request.args,
             allow_redirects=False,
+            timeout=10,  # Add timeout to avoid hanging requests
         )
+        
+        logger.debug(f"NestJS response: status={resp.status_code}")
         
         # Return the response from the NestJS server
         response_headers = [(name, value) for name, value in resp.headers.items()]
         return resp.content, resp.status_code, response_headers
     except requests.exceptions.ConnectionError:
-        return jsonify({"error": "NestJS service unavailable", "message": "API server is starting up or not responding"}), 503
+        logger.error("Connection error when connecting to NestJS server")
+        return jsonify({
+            "error": "NestJS service unavailable", 
+            "message": "API server is starting up or not responding",
+            "status": "error"
+        }), 503
+    except requests.exceptions.Timeout:
+        logger.error("Timeout when connecting to NestJS server")
+        return jsonify({
+            "error": "Request timeout", 
+            "message": "API server took too long to respond",
+            "status": "error"
+        }), 504
+    except Exception as e:
+        logger.exception(f"Error proxying request: {str(e)}")
+        return jsonify({
+            "error": "Proxy error", 
+            "message": str(e),
+            "status": "error"
+        }), 500
 
 if __name__ == '__main__':
     start_nest_server()
