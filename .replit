@@ -9,7 +9,7 @@ run = ["sh", "-c", "npm run start:prod"]
 build = ["sh", "-c", "npm run build"]
 
 [workflows]
-runButton = "Project"
+runButton = "Start NestJS"
 
 [[workflows.workflow]]
 name = "Project"
@@ -34,6 +34,19 @@ task = "packager.installForAll"
 task = "shell.exec"
 args = "gunicorn --bind 0.0.0.0:5000 --reuse-port --reload main:app"
 waitForPort = 5000
+
+[[workflows.workflow]]
+name = "Start NestJS"
+author = 41461493
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm install"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run start:dev"
 
 [[ports]]
 localPort = 5000
