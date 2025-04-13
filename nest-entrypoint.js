@@ -1,36 +1,37 @@
-const { exec } = require('child_process');
+const { exec, spawn } = require('child_process');
 const process = require('process');
 
-// Redis server startup
-exec('redis-server --daemonize yes', (error) => {
-  if (error) {
-    console.error('Failed to start Redis server:', error);
-    return;
-  }
-  console.log('Redis server started successfully');
-  
-  // Run NestJS application
-  const nestProcess = exec('npx ts-node-dev --respawn src/main.ts', {
-    stdio: 'inherit'
-  });
-  
-  nestProcess.stdout.on('data', (data) => {
-    console.log(data.toString());
-  });
-  
-  nestProcess.stderr.on('data', (data) => {
-    console.error(data.toString());
-  });
-  
-  nestProcess.on('exit', (code) => {
-    console.log(`NestJS process exited with code ${code}`);
-  });
-  
-  // Handle process termination
-  process.on('SIGINT', () => {
-    console.log('Stopping Redis and NestJS...');
-    exec('redis-cli shutdown');
-    nestProcess.kill();
-    process.exit();
-  });
+console.log('Starting NestJS server...');
+
+// Skip Redis for development
+console.log('Note: Redis is disabled for development. Using memory cache instead.');
+
+// Run NestJS application with proper I/O redirection
+const nestProcess = spawn('npx', ['ts-node-dev', '--respawn', 'src/main.ts'], {
+  stdio: ['ignore', 'pipe', 'pipe'],
+  shell: true
+});
+
+// Handle stdout and stderr properly
+nestProcess.stdout.on('data', (data) => {
+  console.log(`[NestJS] ${data.toString().trim()}`);
+});
+
+nestProcess.stderr.on('data', (data) => {
+  console.error(`[NestJS-ERR] ${data.toString().trim()}`);
+});
+
+nestProcess.on('error', (error) => {
+  console.error('Failed to start NestJS process:', error);
+});
+
+nestProcess.on('exit', (code) => {
+  console.log(`NestJS process exited with code ${code}`);
+});
+
+// Handle process termination
+process.on('SIGINT', () => {
+  console.log('Stopping NestJS...');
+  nestProcess.kill();
+  process.exit();
 });

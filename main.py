@@ -13,13 +13,8 @@ app = Flask(__name__)
 
 # Start NestJS server
 def start_nest_server():
-    try:
-        # Start Redis
-        subprocess.Popen(['redis-server', '--daemonize', 'yes'])
-        print("Redis server started")
-    except Exception as e:
-        print(f"Error starting Redis: {e}")
-
+    logger.info("Starting NestJS backend server...")
+    
     try:
         # Check if node and nest-entrypoint.js exist
         if not os.path.exists('nest-entrypoint.js'):

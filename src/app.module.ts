@@ -49,16 +49,14 @@ import { SubscriptionsModule } from './modules/subscriptions/subscriptions.modul
       }),
     }),
     
-    // Redis Cache
+    // In-memory Cache for development
     CacheModule.registerAsync({
       isGlobal: true,
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        store: redisStore,
-        host: configService.get('redis.host'),
-        port: configService.get('redis.port'),
-        ttl: configService.get('redis.ttl'),
+        ttl: configService.get('redis.ttl') || 300, // 5 minutes default
+        max: 100, // Maximum number of items in cache
       }),
     }),
     
