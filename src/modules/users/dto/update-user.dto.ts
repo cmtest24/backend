@@ -34,4 +34,15 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   avatarUrl?: string;
+
+  @ApiPropertyOptional({ description: 'Reset password token' })
+  @IsOptional()
+  @IsString()
+  resetPasswordToken?: string;
+
+  @ApiPropertyOptional({ description: 'Reset password token expiration date' })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  resetPasswordExpires?: Date;
 }
