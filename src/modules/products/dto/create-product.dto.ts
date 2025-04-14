@@ -80,8 +80,8 @@ export class CreateProductDto {
   @IsString()
   sku?: string;
 
-  @ApiProperty({ description: 'Category ID the product belongs to' })
-  @IsNotEmpty()
+  @ApiPropertyOptional({ description: 'Category ID the product belongs to' })
+  @IsOptional()
   @IsString()
-  categoryId: string;
+  categoryId?: string;
 }

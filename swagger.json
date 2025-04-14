@@ -588,7 +588,7 @@
             "bearer": []
           }
         ],
-        "summary": "Create a new product (admin only)",
+        "summary": "Create a new product (admin only, chỉ nhận JSON, không upload ảnh trực tiếp)",
         "tags": [
           "products"
         ]
@@ -1990,6 +1990,46 @@
           "subscriptions"
         ]
       }
+    },
+    "/api/upload-images": {
+      "post": {
+        "operationId": "UploadImagesController_uploadImages",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "images": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    },
+                    "description": "Chọn nhiều file ảnh"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Images uploaded successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Upload nhiều ảnh (admin only)",
+        "tags": [
+          "upload-images"
+        ]
+      }
     }
   },
   "info": {
@@ -2306,8 +2346,7 @@
           "name",
           "description",
           "price",
-          "stockQuantity",
-          "categoryId"
+          "stockQuantity"
         ]
       },
       "UpdateProductDto": {

@@ -10,6 +10,13 @@ import {
   Query,
   UseInterceptors,
 } from '@nestjs/common';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { UploadedFiles } from '@nestjs/common';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+import * as fs from 'fs';
+import { ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { Express } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -25,16 +32,22 @@ import { CacheInterceptor } from '../../common/interceptors/cache.interceptor';
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
-
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Create a new product (admin only)' })
+  @ApiOperation({ summary: 'Create a new product (admin only, chỉ nhận JSON, không upload ảnh trực tiếp)' })
   @ApiResponse({ status: 201, description: 'Product created successfully' })
   @ApiBearerAuth()
-  create(@Body() createProductDto: CreateProductDto) {
+  async create(
+    @Body() createProductDto: CreateProductDto
+  ) {
+    // Xử lý categoryId: nếu là "" hoặc không có thì set null để tránh lỗi uuid
+    if (!createProductDto.categoryId || createProductDto.categoryId === '') {
+      createProductDto.categoryId = null;
+    }
     return this.productsService.create(createProductDto);
   }
+
 
   @Get()
   @UseInterceptors(CacheInterceptor)

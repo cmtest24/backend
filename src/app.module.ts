@@ -23,6 +23,7 @@ import { PostsModule } from './modules/posts/posts.module';
 import { ContactModule } from './modules/contact/contact.module';
 import { PromotionsModule } from './modules/promotions/promotions.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
+import { UploadImagesModule } from './modules/upload-images/upload-images.module';
 
 @Module({
   imports: [
@@ -87,6 +88,7 @@ import { SubscriptionsModule } from './modules/subscriptions/subscriptions.modul
     ContactModule,
     PromotionsModule,
     SubscriptionsModule,
+  UploadImagesModule,
   ],
 })
 export class AppModule {}

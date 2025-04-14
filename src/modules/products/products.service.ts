@@ -202,8 +202,10 @@ export class ProductsService {
     // Clear all products-related cache
     // This is a simplified approach - in production you might want to be more selective
     const store: any = (this.cacheManager as any).store;
-    const keys = await store.keys('products_*');
-    await Promise.all(keys.map(key => this.cacheManager.del(key)));
+    if (store && typeof store.keys === 'function') {
+      const keys = await store.keys('products_*');
+      await Promise.all(keys.map((key: string) => this.cacheManager.del(key)));
+    }
     await this.cacheManager.del('featured_products');
   }
 }
