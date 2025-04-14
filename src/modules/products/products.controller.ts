@@ -37,7 +37,7 @@ export class ProductsController {
   }
 
   @Get()
-  @UseInterceptors(new CacheInterceptor())
+  @UseInterceptors(CacheInterceptor)
   @ApiOperation({ summary: 'Get all products with filtering, sorting, and pagination' })
   @ApiResponse({ status: 200, description: 'Return filtered products' })
   findAll(@Query() query: QueryProductDto) {
@@ -45,7 +45,7 @@ export class ProductsController {
   }
 
   @Get('featured')
-  @UseInterceptors(new CacheInterceptor())
+  @UseInterceptors(CacheInterceptor)
   @ApiOperation({ summary: 'Get featured products' })
   @ApiResponse({ status: 200, description: 'Return featured products' })
   findFeatured() {
@@ -53,7 +53,7 @@ export class ProductsController {
   }
 
   @Get(':id')
-  @UseInterceptors(new CacheInterceptor())
+  @UseInterceptors(CacheInterceptor)
   @ApiOperation({ summary: 'Get a product by ID' })
   @ApiResponse({ status: 200, description: 'Return the product' })
   @ApiResponse({ status: 404, description: 'Product not found' })

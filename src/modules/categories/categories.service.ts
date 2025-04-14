@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException, ConflictException, Inject, CACHE_MANAGER } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, Inject } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cache } from 'cache-manager';
@@ -52,7 +53,7 @@ export class CategoriesService {
       order: { sortOrder: 'ASC', name: 'ASC' },
     });
     
-    await this.cacheManager.set('all_categories', categories, { ttl: 3600 }); // Cache for 1 hour
+    await this.cacheManager.set('all_categories', categories, 3600); // Cache for 1 hour
     
     return categories;
   }
@@ -75,7 +76,7 @@ export class CategoriesService {
       throw new NotFoundException(`Category with ID ${id} not found`);
     }
     
-    await this.cacheManager.set(cacheKey, category, { ttl: 3600 }); // Cache for 1 hour
+    await this.cacheManager.set(cacheKey, category, 3600); // Cache for 1 hour
     
     return category;
   }

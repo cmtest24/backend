@@ -20,13 +20,13 @@ import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
-import { UserRole } from '../users/entities/user.entity';
+import { Role } from '../../common/constants/role.enum';
 import { PaginationOptions } from '../../common/interfaces/pagination.interface';
 
 @ApiTags('Admin Orders')
 @Controller('admin/orders')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN)
+@Roles(Role.ADMIN)
 @ApiBearerAuth()
 export class AdminOrdersController {
   constructor(private readonly ordersService: OrdersService) {}
@@ -45,7 +45,7 @@ export class AdminOrdersController {
     @Query('status') status?: string,
     @Query('search') search?: string,
   ) {
-    return this.ordersService.findAll(paginationOptions, status, search);
+    return this.ordersService.findAll();
   }
 
   @Get(':id')
@@ -53,7 +53,7 @@ export class AdminOrdersController {
   @ApiResponse({ status: 200, description: 'Return the order.' })
   @ApiResponse({ status: 404, description: 'Order not found.' })
   findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.ordersService.findOne(id);
+    return this.ordersService.findOneAdmin(id.toString());
   }
 
   @Put(':id/status')
@@ -64,6 +64,6 @@ export class AdminOrdersController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateOrderStatusDto: UpdateOrderStatusDto,
   ) {
-    return this.ordersService.updateStatus(id, updateOrderStatusDto);
+    return this.ordersService.updateStatus(id.toString(), updateOrderStatusDto);
   }
 }

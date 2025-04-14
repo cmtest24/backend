@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException, ConflictException, Inject, CACHE_MANAGER } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, Inject } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
 import { Cache } from 'cache-manager';
@@ -83,7 +84,7 @@ export class PostsService {
     const result = { posts, total };
     
     // Cache the result
-    await this.cacheManager.set(cacheKey, result, { ttl: 1800 }); // Cache for 30 minutes
+    await this.cacheManager.set(cacheKey, result, 1800); // Cache for 30 minutes
     
     return result;
   }
@@ -116,7 +117,7 @@ export class PostsService {
     await this.postsRepository.save(post);
     
     // Cache the post
-    await this.cacheManager.set(cacheKey, post, { ttl: 3600 }); // Cache for 1 hour
+    await this.cacheManager.set(cacheKey, post, 3600); // Cache for 1 hour
     
     return post;
   }
@@ -183,7 +184,8 @@ export class PostsService {
   
   private async clearCache(): Promise<void> {
     // Clear all posts-related cache
-    const keys = await this.cacheManager.store.keys('posts_*');
+    const store: any = (this.cacheManager as any).store;
+    const keys = await store.keys('posts_*');
     await Promise.all(keys.map(key => this.cacheManager.del(key)));
   }
 }

@@ -1,0 +1,2830 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/auth/register": {
+      "post": {
+        "operationId": "AuthController_register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User successfully registered"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "409": {
+            "description": "Email already exists"
+          }
+        },
+        "summary": "Register a new user",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User successfully logged in"
+          },
+          "401": {
+            "description": "Invalid credentials"
+          }
+        },
+        "summary": "Login a user",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/forgot-password": {
+      "post": {
+        "operationId": "AuthController_forgotPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password reset email sent"
+          }
+        },
+        "summary": "Request password reset",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/reset-password": {
+      "post": {
+        "operationId": "AuthController_resetPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password successfully reset"
+          },
+          "400": {
+            "description": "Invalid or expired token"
+          }
+        },
+        "summary": "Reset password with token",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/social-login": {
+      "post": {
+        "operationId": "AuthController_socialLogin",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User successfully logged in"
+          },
+          "400": {
+            "description": "Invalid social login data"
+          }
+        },
+        "summary": "Login via social media",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/admin/login": {
+      "post": {
+        "operationId": "AuthController_adminLogin",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminLoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Admin successfully logged in"
+          },
+          "401": {
+            "description": "Invalid credentials"
+          }
+        },
+        "summary": "Admin login with fullName and password",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/users/me": {
+      "get": {
+        "operationId": "UsersController_getProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Return the current user profile"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get current user profile",
+        "tags": [
+          "users"
+        ]
+      },
+      "put": {
+        "operationId": "UsersController_updateProfile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User profile updated successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update current user profile",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/users": {
+      "get": {
+        "operationId": "UsersController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Return all users"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all users (admin only)",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/users/{id}": {
+      "get": {
+        "operationId": "UsersController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return the user"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get user by id (admin only)",
+        "tags": [
+          "users"
+        ]
+      },
+      "put": {
+        "operationId": "UsersController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated successfully"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update user (admin only)",
+        "tags": [
+          "users"
+        ]
+      },
+      "delete": {
+        "operationId": "UsersController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deleted successfully"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete user (admin only)",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/addresses": {
+      "post": {
+        "operationId": "AddressesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAddressDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Address created successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new address",
+        "tags": [
+          "addresses"
+        ]
+      },
+      "get": {
+        "operationId": "AddressesController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Return all addresses of the user"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all addresses of the user",
+        "tags": [
+          "addresses"
+        ]
+      }
+    },
+    "/api/addresses/{id}": {
+      "put": {
+        "operationId": "AddressesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAddressDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Address updated successfully"
+          },
+          "404": {
+            "description": "Address not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update an address",
+        "tags": [
+          "addresses"
+        ]
+      },
+      "delete": {
+        "operationId": "AddressesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Address deleted successfully"
+          },
+          "404": {
+            "description": "Address not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete an address",
+        "tags": [
+          "addresses"
+        ]
+      }
+    },
+    "/api/addresses/{id}/default": {
+      "put": {
+        "operationId": "AddressesController_setDefault",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Address set as default successfully"
+          },
+          "404": {
+            "description": "Address not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Set an address as default",
+        "tags": [
+          "addresses"
+        ]
+      }
+    },
+    "/api/wishlist": {
+      "post": {
+        "operationId": "WishlistController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateWishlistDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Product added to wishlist successfully"
+          },
+          "409": {
+            "description": "Product already in wishlist"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add product to wishlist",
+        "tags": [
+          "wishlist"
+        ]
+      },
+      "get": {
+        "operationId": "WishlistController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Return user wishlist"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get user wishlist",
+        "tags": [
+          "wishlist"
+        ]
+      }
+    },
+    "/api/wishlist/{productId}": {
+      "delete": {
+        "operationId": "WishlistController_remove",
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product removed from wishlist successfully"
+          },
+          "404": {
+            "description": "Product not found in wishlist"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove product from wishlist",
+        "tags": [
+          "wishlist"
+        ]
+      }
+    },
+    "/api/products": {
+      "post": {
+        "operationId": "ProductsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProductDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Product created successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new product (admin only)",
+        "tags": [
+          "products"
+        ]
+      },
+      "get": {
+        "operationId": "ProductsController_findAll",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search term for product name or description",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoryId",
+            "required": false,
+            "in": "query",
+            "description": "Category ID to filter products",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "minPrice",
+            "required": false,
+            "in": "query",
+            "description": "Minimum price",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxPrice",
+            "required": false,
+            "in": "query",
+            "description": "Maximum price",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "tag",
+            "required": false,
+            "in": "query",
+            "description": "Tag to filter products",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "featured",
+            "required": false,
+            "in": "query",
+            "description": "Only include featured products",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Field to sort by",
+            "schema": {
+              "default": "createdAt",
+              "type": "string",
+              "enum": [
+                "price",
+                "name",
+                "createdAt",
+                "averageRating"
+              ]
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "description": "Sort order",
+            "schema": {
+              "default": "DESC",
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number for pagination",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Number of items per page",
+            "schema": {
+              "default": 10,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return filtered products"
+          }
+        },
+        "summary": "Get all products with filtering, sorting, and pagination",
+        "tags": [
+          "products"
+        ]
+      }
+    },
+    "/api/products/featured": {
+      "get": {
+        "operationId": "ProductsController_findFeatured",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Return featured products"
+          }
+        },
+        "summary": "Get featured products",
+        "tags": [
+          "products"
+        ]
+      }
+    },
+    "/api/products/{id}": {
+      "get": {
+        "operationId": "ProductsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return the product"
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        },
+        "summary": "Get a product by ID",
+        "tags": [
+          "products"
+        ]
+      },
+      "put": {
+        "operationId": "ProductsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProductDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Product updated successfully"
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a product (admin only)",
+        "tags": [
+          "products"
+        ]
+      },
+      "delete": {
+        "operationId": "ProductsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product deleted successfully"
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a product (admin only)",
+        "tags": [
+          "products"
+        ]
+      }
+    },
+    "/api/categories": {
+      "post": {
+        "operationId": "CategoriesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Category created successfully"
+          },
+          "409": {
+            "description": "Category with this name already exists"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new category (admin only)",
+        "tags": [
+          "categories"
+        ]
+      },
+      "get": {
+        "operationId": "CategoriesController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Return all categories"
+          }
+        },
+        "summary": "Get all categories",
+        "tags": [
+          "categories"
+        ]
+      }
+    },
+    "/api/categories/{id}": {
+      "get": {
+        "operationId": "CategoriesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return the category with products"
+          },
+          "404": {
+            "description": "Category not found"
+          }
+        },
+        "summary": "Get a category by ID with products",
+        "tags": [
+          "categories"
+        ]
+      },
+      "put": {
+        "operationId": "CategoriesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Category updated successfully"
+          },
+          "404": {
+            "description": "Category not found"
+          },
+          "409": {
+            "description": "Category with this name already exists"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a category (admin only)",
+        "tags": [
+          "categories"
+        ]
+      },
+      "delete": {
+        "operationId": "CategoriesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Category deleted successfully"
+          },
+          "404": {
+            "description": "Category not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a category (admin only)",
+        "tags": [
+          "categories"
+        ]
+      }
+    },
+    "/api/cart": {
+      "post": {
+        "operationId": "CartController_addToCart",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddToCartDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Product added to cart successfully"
+          },
+          "400": {
+            "description": "Product not available or insufficient stock"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add product to cart",
+        "tags": [
+          "cart"
+        ]
+      },
+      "get": {
+        "operationId": "CartController_getCart",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Return user cart with total"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get user cart",
+        "tags": [
+          "cart"
+        ]
+      }
+    },
+    "/api/cart/{itemId}": {
+      "put": {
+        "operationId": "CartController_updateCartItem",
+        "parameters": [
+          {
+            "name": "itemId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCartItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cart item updated successfully"
+          },
+          "400": {
+            "description": "Insufficient stock"
+          },
+          "404": {
+            "description": "Cart item not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update cart item quantity",
+        "tags": [
+          "cart"
+        ]
+      },
+      "delete": {
+        "operationId": "CartController_removeCartItem",
+        "parameters": [
+          {
+            "name": "itemId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Item removed from cart successfully"
+          },
+          "404": {
+            "description": "Cart item not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove item from cart",
+        "tags": [
+          "cart"
+        ]
+      }
+    },
+    "/api/orders": {
+      "post": {
+        "operationId": "OrdersController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrderDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Order created successfully"
+          },
+          "400": {
+            "description": "Invalid input or insufficient stock"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new order",
+        "tags": [
+          "orders"
+        ]
+      },
+      "get": {
+        "operationId": "OrdersController_findAllByUser",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Return user orders"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get user orders",
+        "tags": [
+          "orders"
+        ]
+      }
+    },
+    "/api/orders/{id}": {
+      "get": {
+        "operationId": "OrdersController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return the order"
+          },
+          "404": {
+            "description": "Order not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get order by ID",
+        "tags": [
+          "orders"
+        ]
+      }
+    },
+    "/api/orders/{id}/cancel": {
+      "put": {
+        "operationId": "OrdersController_cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order cancelled successfully"
+          },
+          "400": {
+            "description": "Order cannot be cancelled"
+          },
+          "404": {
+            "description": "Order not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancel an order",
+        "tags": [
+          "orders"
+        ]
+      }
+    },
+    "/api/orders/admin/orders": {
+      "get": {
+        "operationId": "OrdersController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Return all orders"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all orders (admin only)",
+        "tags": [
+          "orders"
+        ]
+      }
+    },
+    "/api/orders/admin/orders/{id}/status": {
+      "put": {
+        "operationId": "OrdersController_updateStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOrderStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Order status updated successfully"
+          },
+          "404": {
+            "description": "Order not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update order status (admin only)",
+        "tags": [
+          "orders"
+        ]
+      }
+    },
+    "/api/promotions": {
+      "post": {
+        "operationId": "PromotionsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePromotionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Promotion created successfully"
+          },
+          "409": {
+            "description": "Promotion with this code already exists"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new promotion (admin only)",
+        "tags": [
+          "promotions"
+        ]
+      },
+      "get": {
+        "operationId": "PromotionsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Return all active promotions"
+          }
+        },
+        "summary": "Get all active promotions",
+        "tags": [
+          "promotions"
+        ]
+      }
+    },
+    "/api/promotions/{code}": {
+      "get": {
+        "operationId": "PromotionsController_findByCode",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return the promotion if valid"
+          },
+          "404": {
+            "description": "Promotion not found or invalid"
+          }
+        },
+        "summary": "Check if a promotion code is valid",
+        "tags": [
+          "promotions"
+        ]
+      }
+    },
+    "/api/promotions/{id}": {
+      "delete": {
+        "operationId": "PromotionsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Promotion deleted successfully"
+          },
+          "404": {
+            "description": "Promotion not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a promotion (admin only)",
+        "tags": [
+          "promotions"
+        ]
+      }
+    },
+    "/api/payments": {
+      "post": {
+        "operationId": "PaymentsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePaymentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Payment created successfully"
+          },
+          "400": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new payment",
+        "tags": [
+          "payments"
+        ]
+      }
+    },
+    "/api/payments/{id}": {
+      "get": {
+        "operationId": "PaymentsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return the payment status"
+          },
+          "404": {
+            "description": "Payment not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get payment status",
+        "tags": [
+          "payments"
+        ]
+      }
+    },
+    "/api/products/{id}/reviews": {
+      "post": {
+        "operationId": "ReviewsController_create",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReviewDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Review created successfully"
+          },
+          "400": {
+            "description": "Bad request or already reviewed"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a product review",
+        "tags": [
+          "reviews"
+        ]
+      },
+      "get": {
+        "operationId": "ReviewsController_findAllByProduct",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return product reviews"
+          }
+        },
+        "summary": "Get all reviews for a product",
+        "tags": [
+          "reviews"
+        ]
+      }
+    },
+    "/api/reviews/{id}": {
+      "put": {
+        "operationId": "ReviewsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateReviewDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Review updated successfully"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Review not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a review",
+        "tags": [
+          "reviews"
+        ]
+      },
+      "delete": {
+        "operationId": "ReviewsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Review deleted successfully"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Review not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a review",
+        "tags": [
+          "reviews"
+        ]
+      }
+    },
+    "/api/posts": {
+      "post": {
+        "operationId": "PostsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePostDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Post created successfully"
+          },
+          "409": {
+            "description": "Post with this slug already exists"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new blog post (admin only)",
+        "tags": [
+          "posts"
+        ]
+      },
+      "get": {
+        "operationId": "PostsController_findAll",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search term",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tag",
+            "required": false,
+            "in": "query",
+            "description": "Filter by tag",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Number of posts per page",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return published posts"
+          }
+        },
+        "summary": "Get all published blog posts",
+        "tags": [
+          "posts"
+        ]
+      }
+    },
+    "/api/posts/{slug}": {
+      "get": {
+        "operationId": "PostsController_findBySlug",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return the post"
+          },
+          "404": {
+            "description": "Post not found"
+          }
+        },
+        "summary": "Get a blog post by slug",
+        "tags": [
+          "posts"
+        ]
+      }
+    },
+    "/api/posts/{id}": {
+      "put": {
+        "operationId": "PostsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePostDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Post updated successfully"
+          },
+          "404": {
+            "description": "Post not found"
+          },
+          "409": {
+            "description": "Post with this slug already exists"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a blog post (admin only)",
+        "tags": [
+          "posts"
+        ]
+      },
+      "delete": {
+        "operationId": "PostsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Post deleted successfully"
+          },
+          "404": {
+            "description": "Post not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a blog post (admin only)",
+        "tags": [
+          "posts"
+        ]
+      }
+    },
+    "/api/contact": {
+      "post": {
+        "operationId": "ContactController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateContactDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Contact form submitted successfully"
+          }
+        },
+        "summary": "Submit a contact form",
+        "tags": [
+          "contact"
+        ]
+      },
+      "get": {
+        "operationId": "ContactController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Return all contact submissions"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all contact submissions (admin only)",
+        "tags": [
+          "contact"
+        ]
+      }
+    },
+    "/api/contact/{id}/read": {
+      "put": {
+        "operationId": "ContactController_markAsRead",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Contact marked as read"
+          },
+          "404": {
+            "description": "Contact not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark contact as read (admin only)",
+        "tags": [
+          "contact"
+        ]
+      }
+    },
+    "/api/contact/{id}/replied": {
+      "put": {
+        "operationId": "ContactController_markAsReplied",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Contact marked as replied"
+          },
+          "404": {
+            "description": "Contact not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark contact as replied with notes (admin only)",
+        "tags": [
+          "contact"
+        ]
+      }
+    },
+    "/api/contact/{id}": {
+      "delete": {
+        "operationId": "ContactController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Contact deleted successfully"
+          },
+          "404": {
+            "description": "Contact not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a contact submission (admin only)",
+        "tags": [
+          "contact"
+        ]
+      }
+    },
+    "/api/subscriptions": {
+      "post": {
+        "operationId": "SubscriptionsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSubscriptionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Email subscribed successfully"
+          },
+          "409": {
+            "description": "Email already subscribed"
+          }
+        },
+        "summary": "Subscribe to newsletter",
+        "tags": [
+          "subscriptions"
+        ]
+      },
+      "get": {
+        "operationId": "SubscriptionsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Return all subscribed emails"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all subscribed emails (admin only)",
+        "tags": [
+          "subscriptions"
+        ]
+      }
+    },
+    "/api/subscriptions/{id}": {
+      "delete": {
+        "operationId": "SubscriptionsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Email unsubscribed successfully"
+          },
+          "404": {
+            "description": "Subscription not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Unsubscribe an email (admin only)",
+        "tags": [
+          "subscriptions"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Đông Y Pharmacy API",
+    "description": "The Đông Y Pharmacy REST API documentation",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "RegisterDto": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "description": "Full name of the user"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address of the user"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "description": "Phone number of the user"
+          },
+          "password": {
+            "type": "string",
+            "description": "Password for the user account"
+          }
+        },
+        "required": [
+          "fullName",
+          "email",
+          "password"
+        ]
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email address of the user"
+          },
+          "password": {
+            "type": "string",
+            "description": "Password for the user account"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "ForgotPasswordDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email address of the user"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "ResetPasswordDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Reset password token"
+          },
+          "password": {
+            "type": "string",
+            "description": "New password for the user account"
+          }
+        },
+        "required": [
+          "token",
+          "password"
+        ]
+      },
+      "AdminLoginDto": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "description": "Full name of the admin"
+          },
+          "password": {
+            "type": "string",
+            "description": "Password for the admin account"
+          }
+        },
+        "required": [
+          "fullName",
+          "password"
+        ]
+      },
+      "UpdateUserDto": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "description": "Full name of the user"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address of the user"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "description": "Phone number of the user"
+          },
+          "password": {
+            "type": "string",
+            "description": "Password for the user account"
+          },
+          "role": {
+            "type": "string",
+            "description": "Role of the user",
+            "enum": [
+              "user",
+              "admin"
+            ]
+          },
+          "avatarUrl": {
+            "type": "string",
+            "description": "URL to the user avatar image"
+          },
+          "resetPasswordToken": {
+            "type": "string",
+            "description": "Reset password token"
+          },
+          "resetPasswordExpires": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Reset password token expiration date"
+          }
+        }
+      },
+      "CreateAddressDto": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "description": "Full name of the recipient"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "description": "Phone number of the recipient"
+          },
+          "street": {
+            "type": "string",
+            "description": "Street address including house/apartment number"
+          },
+          "ward": {
+            "type": "string",
+            "description": "Ward/community"
+          },
+          "district": {
+            "type": "string",
+            "description": "District"
+          },
+          "city": {
+            "type": "string",
+            "description": "City/province"
+          },
+          "zipCode": {
+            "type": "string",
+            "description": "Postal/zip code"
+          },
+          "isDefault": {
+            "type": "boolean",
+            "description": "Set as default address"
+          }
+        },
+        "required": [
+          "fullName",
+          "phoneNumber",
+          "street",
+          "ward",
+          "district",
+          "city"
+        ]
+      },
+      "UpdateAddressDto": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "description": "Full name of the recipient"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "description": "Phone number of the recipient"
+          },
+          "street": {
+            "type": "string",
+            "description": "Street address including house/apartment number"
+          },
+          "ward": {
+            "type": "string",
+            "description": "Ward/community"
+          },
+          "district": {
+            "type": "string",
+            "description": "District"
+          },
+          "city": {
+            "type": "string",
+            "description": "City/province"
+          },
+          "zipCode": {
+            "type": "string",
+            "description": "Postal/zip code"
+          },
+          "isDefault": {
+            "type": "boolean",
+            "description": "Set as default address"
+          }
+        }
+      },
+      "CreateWishlistDto": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "description": "Product ID to add to wishlist"
+          }
+        },
+        "required": [
+          "productId"
+        ]
+      },
+      "CreateProductDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the product"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description of the product"
+          },
+          "price": {
+            "type": "number",
+            "description": "Regular price of the product"
+          },
+          "salePrice": {
+            "type": "number",
+            "description": "Sale price of the product"
+          },
+          "stockQuantity": {
+            "type": "number",
+            "description": "Stock quantity of the product"
+          },
+          "imageUrl": {
+            "type": "string",
+            "description": "URL to the main product image"
+          },
+          "additionalImages": {
+            "description": "Additional product images",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tags": {
+            "description": "Tags associated with the product",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the product is active",
+            "default": true
+          },
+          "isFeatured": {
+            "type": "boolean",
+            "description": "Whether the product is featured",
+            "default": false
+          },
+          "specifications": {
+            "type": "string",
+            "description": "Product specifications in detail"
+          },
+          "usageInstructions": {
+            "type": "string",
+            "description": "Usage instructions for the product"
+          },
+          "sku": {
+            "type": "string",
+            "description": "Stock keeping unit (SKU)"
+          },
+          "categoryId": {
+            "type": "string",
+            "description": "Category ID the product belongs to"
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "price",
+          "stockQuantity",
+          "categoryId"
+        ]
+      },
+      "UpdateProductDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the product"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description of the product"
+          },
+          "price": {
+            "type": "number",
+            "description": "Regular price of the product"
+          },
+          "salePrice": {
+            "type": "number",
+            "description": "Sale price of the product"
+          },
+          "stockQuantity": {
+            "type": "number",
+            "description": "Stock quantity of the product"
+          },
+          "imageUrl": {
+            "type": "string",
+            "description": "URL to the main product image"
+          },
+          "additionalImages": {
+            "description": "Additional product images",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tags": {
+            "description": "Tags associated with the product",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the product is active"
+          },
+          "isFeatured": {
+            "type": "boolean",
+            "description": "Whether the product is featured"
+          },
+          "specifications": {
+            "type": "string",
+            "description": "Product specifications in detail"
+          },
+          "usageInstructions": {
+            "type": "string",
+            "description": "Usage instructions for the product"
+          },
+          "sku": {
+            "type": "string",
+            "description": "Stock keeping unit (SKU)"
+          },
+          "categoryId": {
+            "type": "string",
+            "description": "Category ID the product belongs to"
+          }
+        }
+      },
+      "CreateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the category"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the category"
+          },
+          "imageUrl": {
+            "type": "string",
+            "description": "URL to the category image"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the category is active",
+            "default": true
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "Order for sorting categories",
+            "default": 0
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the category"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the category"
+          },
+          "imageUrl": {
+            "type": "string",
+            "description": "URL to the category image"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the category is active"
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "Order for sorting categories"
+          }
+        }
+      },
+      "AddToCartDto": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "description": "Product ID to add to cart"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Quantity of the product",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "productId",
+          "quantity"
+        ]
+      },
+      "UpdateCartItemDto": {
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "type": "number",
+            "description": "New quantity of the product",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "quantity"
+        ]
+      },
+      "CreateOrderDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "description": "Order items (if not using cart items)",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "shippingFullName": {
+            "type": "string",
+            "description": "Shipping full name"
+          },
+          "shippingPhone": {
+            "type": "string",
+            "description": "Shipping phone number"
+          },
+          "shippingAddress": {
+            "type": "string",
+            "description": "Shipping address"
+          },
+          "shippingWard": {
+            "type": "string",
+            "description": "Shipping ward/community"
+          },
+          "shippingDistrict": {
+            "type": "string",
+            "description": "Shipping district"
+          },
+          "shippingCity": {
+            "type": "string",
+            "description": "Shipping city/province"
+          },
+          "shippingZipCode": {
+            "type": "string",
+            "description": "Shipping postal/zip code"
+          },
+          "promotionCode": {
+            "type": "string",
+            "description": "Promotion code"
+          },
+          "note": {
+            "type": "string",
+            "description": "Order note"
+          },
+          "useCartItems": {
+            "type": "boolean",
+            "description": "Use items from cart",
+            "default": true
+          }
+        },
+        "required": [
+          "shippingFullName",
+          "shippingPhone",
+          "shippingAddress",
+          "shippingWard",
+          "shippingDistrict",
+          "shippingCity"
+        ]
+      },
+      "UpdateOrderStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "New order status",
+            "enum": [
+              "pending",
+              "processing",
+              "shipped",
+              "delivered",
+              "cancelled"
+            ]
+          },
+          "trackingNumber": {
+            "type": "string",
+            "description": "Tracking number for shipped orders"
+          },
+          "cancelReason": {
+            "type": "string",
+            "description": "Reason for cancellation if status is cancelled"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "CreatePromotionDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the promotion"
+          },
+          "code": {
+            "type": "string",
+            "description": "Unique promotion code"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the promotion"
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of promotion",
+            "enum": [
+              "percentage",
+              "fixed_amount",
+              "free_shipping"
+            ]
+          },
+          "amount": {
+            "type": "number",
+            "description": "Amount of the discount (percentage or fixed)"
+          },
+          "minimumPurchase": {
+            "type": "number",
+            "description": "Minimum purchase amount required"
+          },
+          "usageLimit": {
+            "type": "number",
+            "description": "Maximum number of times this promotion can be used"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether this promotion is active",
+            "default": true
+          },
+          "startDate": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Start date of the promotion"
+          },
+          "endDate": {
+            "format": "date-time",
+            "type": "string",
+            "description": "End date of the promotion"
+          }
+        },
+        "required": [
+          "name",
+          "code",
+          "type",
+          "amount",
+          "startDate",
+          "endDate"
+        ]
+      },
+      "CreatePaymentDto": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "description": "Order ID to pay for"
+          },
+          "method": {
+            "type": "string",
+            "description": "Payment method",
+            "enum": [
+              "bank_transfer",
+              "credit_card",
+              "cod",
+              "momo",
+              "vnpay",
+              "zalopay"
+            ]
+          },
+          "paymentDetails": {
+            "type": "object",
+            "description": "Additional payment details"
+          }
+        },
+        "required": [
+          "orderId",
+          "method"
+        ]
+      },
+      "CreateReviewDto": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "description": "Product ID to review"
+          },
+          "rating": {
+            "type": "number",
+            "description": "Rating from 1 to 5",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "comment": {
+            "type": "string",
+            "description": "Review comment/feedback"
+          },
+          "imageUrl": {
+            "type": "string",
+            "description": "URL to review image"
+          }
+        },
+        "required": [
+          "productId",
+          "rating",
+          "comment"
+        ]
+      },
+      "UpdateReviewDto": {
+        "type": "object",
+        "properties": {
+          "rating": {
+            "type": "number",
+            "description": "Rating from 1 to 5",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "comment": {
+            "type": "string",
+            "description": "Review comment/feedback"
+          },
+          "imageUrl": {
+            "type": "string",
+            "description": "URL to review image"
+          },
+          "isPublished": {
+            "type": "boolean",
+            "description": "Set visibility status (admin only)"
+          }
+        }
+      },
+      "CreatePostDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Title of the blog post"
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL-friendly slug for the post"
+          },
+          "content": {
+            "type": "string",
+            "description": "Full content of the post in HTML/Markdown"
+          },
+          "summary": {
+            "type": "string",
+            "description": "Short summary of the post"
+          },
+          "imageUrl": {
+            "type": "string",
+            "description": "URL to the featured image"
+          },
+          "isPublished": {
+            "type": "boolean",
+            "description": "Whether the post is published",
+            "default": true
+          },
+          "tags": {
+            "description": "Tags associated with the post",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "authorName": {
+            "type": "string",
+            "description": "Name of the post author"
+          }
+        },
+        "required": [
+          "title",
+          "slug",
+          "content"
+        ]
+      },
+      "UpdatePostDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Title of the blog post"
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL-friendly slug for the post"
+          },
+          "content": {
+            "type": "string",
+            "description": "Full content of the post in HTML/Markdown"
+          },
+          "summary": {
+            "type": "string",
+            "description": "Short summary of the post"
+          },
+          "imageUrl": {
+            "type": "string",
+            "description": "URL to the featured image"
+          },
+          "isPublished": {
+            "type": "boolean",
+            "description": "Whether the post is published"
+          },
+          "tags": {
+            "description": "Tags associated with the post",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "authorName": {
+            "type": "string",
+            "description": "Name of the post author"
+          }
+        }
+      },
+      "CreateContactDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Full name of the contact person"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address for reply"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "description": "Phone number of the contact person"
+          },
+          "subject": {
+            "type": "string",
+            "description": "Subject of the contact message"
+          },
+          "message": {
+            "type": "string",
+            "description": "Content of the contact message"
+          }
+        },
+        "required": [
+          "name",
+          "email",
+          "subject",
+          "message"
+        ]
+      },
+      "CreateSubscriptionDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email address to subscribe"
+          },
+          "source": {
+            "type": "string",
+            "description": "Source of the subscription (e.g., footer, popup)"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      }
+    }
+  }
+}

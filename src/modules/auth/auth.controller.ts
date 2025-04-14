@@ -5,6 +5,7 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { AdminLoginDto } from './dto/admin-login.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -56,5 +57,13 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Invalid social login data' })
   socialLogin(@Body() body: any) {
     return this.authService.socialLogin(body);
+  }
+  @Post('admin/login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Admin login with fullName and password' })
+  @ApiResponse({ status: 200, description: 'Admin successfully logged in' })
+  @ApiResponse({ status: 401, description: 'Invalid credentials' })
+  adminLogin(@Body() adminLoginDto: AdminLoginDto) {
+    return this.authService.loginAdmin(adminLoginDto.fullName, adminLoginDto.password);
   }
 }

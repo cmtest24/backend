@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException, Inject, CACHE_MANAGER } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between, Like, FindManyOptions } from 'typeorm';
 import { Cache } from 'cache-manager';
@@ -94,7 +95,7 @@ export class ProductsService {
     const result = { products, total };
     
     // Cache the result
-    await this.cacheManager.set(cacheKey, result, { ttl: 600 }); // Cache for 10 minutes
+    await this.cacheManager.set(cacheKey, result, 600); // Cache for 10 minutes
     
     return result;
   }
@@ -116,7 +117,7 @@ export class ProductsService {
     });
     
     // Cache the result
-    await this.cacheManager.set(cacheKey, products, { ttl: 3600 }); // Cache for 1 hour
+    await this.cacheManager.set(cacheKey, products, 3600); // Cache for 1 hour
     
     return products;
   }
@@ -144,7 +145,7 @@ export class ProductsService {
     await this.productsRepository.save(product);
     
     // Cache the result
-    await this.cacheManager.set(cacheKey, product, { ttl: 1800 }); // Cache for 30 minutes
+    await this.cacheManager.set(cacheKey, product, 1800); // Cache for 30 minutes
     
     return product;
   }
@@ -200,7 +201,8 @@ export class ProductsService {
   private async clearCache(): Promise<void> {
     // Clear all products-related cache
     // This is a simplified approach - in production you might want to be more selective
-    const keys = await this.cacheManager.store.keys('products_*');
+    const store: any = (this.cacheManager as any).store;
+    const keys = await store.keys('products_*');
     await Promise.all(keys.map(key => this.cacheManager.del(key)));
     await this.cacheManager.del('featured_products');
   }

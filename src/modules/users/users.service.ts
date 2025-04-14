@@ -82,4 +82,11 @@ export class UsersService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
   }
+  async findByFullName(fullName: string): Promise<User> {
+    const user = await this.usersRepository.findOne({ where: { fullName } });
+    if (!user) {
+      throw new NotFoundException(`User with fullName ${fullName} not found`);
+    }
+    return user;
+  }
 }

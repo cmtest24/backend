@@ -165,4 +165,19 @@ export class AuthService {
       expiresIn: this.configService.get('jwt.expiresIn'),
     };
   }
+  async loginAdmin(fullName: string, password: string) {
+    try {
+      const user = await this.usersService.findByFullName(fullName);
+      if (user.role !== 'admin') {
+        throw new UnauthorizedException('Only admin can login here');
+      }
+      const isPasswordValid = await PasswordUtil.compare(password, user.password);
+      if (!isPasswordValid) {
+        throw new UnauthorizedException('Invalid credentials');
+      }
+      return this.generateTokenResponse(user);
+    } catch (error) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+  }
 }

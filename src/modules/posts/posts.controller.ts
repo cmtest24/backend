@@ -37,7 +37,7 @@ export class PostsController {
   }
 
   @Get()
-  @UseInterceptors(new CacheInterceptor())
+  @UseInterceptors(CacheInterceptor)
   @ApiOperation({ summary: 'Get all published blog posts' })
   @ApiResponse({ status: 200, description: 'Return published posts' })
   @ApiQuery({ name: 'search', required: false, description: 'Search term' })
@@ -54,7 +54,7 @@ export class PostsController {
   }
 
   @Get(':slug')
-  @UseInterceptors(new CacheInterceptor())
+  @UseInterceptors(CacheInterceptor)
   @ApiOperation({ summary: 'Get a blog post by slug' })
   @ApiResponse({ status: 200, description: 'Return the post' })
   @ApiResponse({ status: 404, description: 'Post not found' })
