@@ -29,7 +29,7 @@ export class UploadImagesController {
     FilesInterceptor('images', undefined, {
       storage: diskStorage({
         destination: (req, file, cb) => {
-          const uploadPath = 'backend/public/products';
+          const uploadPath = 'public/';
           if (!fs.existsSync(uploadPath)) {
             fs.mkdirSync(uploadPath, { recursive: true });
           }
@@ -72,8 +72,7 @@ export class UploadImagesController {
       return { imageUrls: [] };
     }
     const urls = files.map(
-      (file) =>
-        `/public/products/${file.filename}`,
+      (file) => `/public/${file.filename}`
     );
     return { imageUrls: urls };
   }

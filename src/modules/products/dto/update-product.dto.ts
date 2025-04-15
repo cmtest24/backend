@@ -9,6 +9,7 @@ import {
   IsPositive
 } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 export class UpdateProductDto {
   @ApiPropertyOptional({ description: 'Name of the product' })
@@ -42,11 +43,23 @@ export class UpdateProductDto {
   @ApiPropertyOptional({ description: 'URL to the main product image' })
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => {
+    if (!value) return value;
+    if (value.startsWith('http')) return value;
+    return `${process.env.DOMAIN}${value}`;
+  })
   imageUrl?: string;
 
   @ApiPropertyOptional({ description: 'Additional product images' })
   @IsOptional()
   @IsArray()
+  @Transform(({ value }) => {
+    if (!value) return value;
+    return value.map(url => {
+      if (url.startsWith('http')) return url;
+      return `${process.env.DOMAIN}${url}`;
+    });
+  })
   additionalImages?: string[];
 
   @ApiPropertyOptional({ description: 'Tags associated with the product' })

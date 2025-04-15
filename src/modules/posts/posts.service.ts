@@ -185,7 +185,9 @@ export class PostsService {
   private async clearCache(): Promise<void> {
     // Clear all posts-related cache
     const store: any = (this.cacheManager as any).store;
-    const keys = await store.keys('posts_*');
-    await Promise.all(keys.map(key => this.cacheManager.del(key)));
+    if (store && typeof store.keys === 'function') {
+      const keys = await store.keys('posts_*');
+      await Promise.all(keys.map(key => this.cacheManager.del(key)));
+    }
   }
 }

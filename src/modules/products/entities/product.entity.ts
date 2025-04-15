@@ -60,7 +60,7 @@ export class Product {
   @Column({ nullable: true })
   sku: string;
 
-  @Column()
+  @Column({ nullable: true })
   categoryId: string;
 
   @ManyToOne(() => Category, (category) => category.products)
