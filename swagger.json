@@ -2718,13 +2718,13 @@
             "type": "string",
             "description": "Tên danh mục"
           },
+          "slug": {
+            "type": "string",
+            "description": "Slug (url friendly)"
+          },
           "description": {
             "type": "string",
             "description": "Mô tả danh mục"
-          },
-          "imageUrl": {
-            "type": "string",
-            "description": "URL ảnh danh mục"
           },
           "isActive": {
             "type": "boolean",
@@ -2736,14 +2736,17 @@
             "description": "Thứ tự sắp xếp",
             "default": 0
           },
-          "parentId": {
-            "type": "string",
-            "description": "ID danh mục cha (nếu có)"
+          "level": {
+            "type": "number",
+            "description": "Cấp độ danh mục",
+            "default": 0
           }
         },
         "required": [
           "type",
-          "name"
+          "name",
+          "slug",
+          "level"
         ]
       },
       "UpdateCategoryDto": {
@@ -2757,13 +2760,13 @@
             "type": "string",
             "description": "Tên danh mục"
           },
+          "slug": {
+            "type": "string",
+            "description": "Slug (url friendly)"
+          },
           "description": {
             "type": "string",
             "description": "Description of the category"
-          },
-          "imageUrl": {
-            "type": "string",
-            "description": "URL to the category image"
           },
           "isActive": {
             "type": "boolean",
@@ -2773,9 +2776,9 @@
             "type": "number",
             "description": "Order for sorting categories"
           },
-          "parentId": {
-            "type": "string",
-            "description": "ID danh mục cha (nếu có)"
+          "level": {
+            "type": "number",
+            "description": "Cấp độ danh mục"
           }
         }
       },

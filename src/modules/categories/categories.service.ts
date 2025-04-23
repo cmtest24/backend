@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, ConflictException, Inject } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, TreeRepository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Cache } from 'cache-manager';
 import { Category } from './entities/category.entity';
 import { CategoryType } from './enums/category-type.enum';
@@ -12,35 +12,27 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 export class CategoriesService {
   constructor(
     @InjectRepository(Category)
-    private categoriesRepository: TreeRepository<Category>,
+    private categoriesRepository: Repository<Category>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
-    const { parentId, ...rest } = createCategoryDto;
+    const { ...rest } = createCategoryDto;
     try {
-      // Check if category with name and type already exists at the same level
+      // Check if category with name, type and level already exists
       const existingCategory = await this.categoriesRepository.findOne({
         where: {
           name: rest.name,
           type: rest.type,
-          parent: parentId ? { id: parentId } : null,
+          level: rest.level,
         },
       });
 
       if (existingCategory) {
-        throw new ConflictException(`Category with name "${rest.name}" and type "${rest.type}" already exists under this parent.`);
+        throw new ConflictException(`Category with name "${rest.name}", type "${rest.type}" and level "${rest.level}" already exists.`);
       }
 
       const category = this.categoriesRepository.create(rest);
-
-      if (parentId) {
-        const parentCategory = await this.categoriesRepository.findOne({ where: { id: parentId } });
-        if (!parentCategory) {
-          throw new NotFoundException(`Parent category with ID ${parentId} not found`);
-        }
-        category.parent = parentCategory;
-      }
 
       const savedCategory = await this.categoriesRepository.save(category);
 
@@ -57,7 +49,7 @@ export class CategoriesService {
   }
 
   async findAll(type?: CategoryType): Promise<Category[]> {
-    const cacheKey = type ? `categories_tree_${type}` : 'categories_tree_all';
+    const cacheKey = type ? `categories_${type}` : 'categories_all';
     // Try to get from cache first
     const cachedCategories = await this.cacheManager.get<Category[]>(cacheKey);
     if (cachedCategories) {
@@ -71,16 +63,13 @@ export class CategoriesService {
       queryBuilder.where('category.type = :type', { type });
     }
 
-    queryBuilder.orderBy('category.sortOrder', 'ASC');
+    queryBuilder.orderBy('category.level', 'ASC').addOrderBy('category.sortOrder', 'ASC');
 
-    const categories = await this.categoriesRepository.findTrees(); // findTrees() fetches all and builds the tree
+    const categories = await queryBuilder.getMany();
 
-    // Filter the top-level categories by type if specified
-    const filteredCategories = type ? categories.filter(cat => cat.type === type) : categories;
+    await this.cacheManager.set(cacheKey, categories, 3600); // Cache for 1 hour
 
-    await this.cacheManager.set(cacheKey, filteredCategories, 3600); // Cache for 1 hour
-
-    return filteredCategories;
+    return categories;
   }
 
   async findOne(id: string): Promise<Category> {
@@ -108,42 +97,29 @@ export class CategoriesService {
 
   async update(id: string, updateCategoryDto: UpdateCategoryDto): Promise<Category> {
     const category = await this.findOne(id);
-    const { parentId, ...rest } = updateCategoryDto;
+    const { ...rest } = updateCategoryDto;
 
-    // Check for name uniqueness if name or type is being updated or parent is changed
+    // Check for name, type and level uniqueness if they are being updated
     if (
       (rest.name && rest.name !== category.name) ||
       (rest.type && rest.type !== category.type) ||
-      (parentId !== undefined && (parentId !== (category.parent?.id || null)))
+      (rest.level !== undefined && rest.level !== category.level)
     ) {
       const existingCategory = await this.categoriesRepository.findOne({
         where: {
           name: rest.name || category.name,
           type: rest.type || category.type,
-          parent: parentId !== undefined ? (parentId ? { id: parentId } : null) : category.parent,
+          level: rest.level !== undefined ? rest.level : category.level,
         },
       });
 
       if (existingCategory && existingCategory.id !== id) {
-        throw new ConflictException(`Category with name "${rest.name || category.name}" and type "${rest.type || category.type}" already exists under this parent.`);
+        throw new ConflictException(`Category with name "${rest.name || category.name}", type "${rest.type || category.type}" and level "${rest.level !== undefined ? rest.level : category.level}" already exists.`);
       }
     }
 
     // Update the category properties
     Object.assign(category, rest);
-
-    // Update parent if parentId is provided
-    if (parentId !== undefined) {
-      if (parentId === null) {
-        category.parent = null;
-      } else {
-        const parentCategory = await this.categoriesRepository.findOne({ where: { id: parentId } });
-        if (!parentCategory) {
-          throw new NotFoundException(`Parent category with ID ${parentId} not found`);
-        }
-        category.parent = parentCategory;
-      }
-    }
 
     const updatedCategory = await this.categoriesRepository.save(category);
 
@@ -167,10 +143,10 @@ export class CategoriesService {
 
   private async clearCache(type?: CategoryType): Promise<void> {
     // Clear the general cache
-    await this.cacheManager.del('categories_tree_all');
+    await this.cacheManager.del('categories_all');
     // If a specific type was modified, clear its cache as well
     if (type) {
-      await this.cacheManager.del(`categories_tree_${type}`);
+      await this.cacheManager.del(`categories_${type}`);
     }
   }
 }
