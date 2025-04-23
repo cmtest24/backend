@@ -846,6 +846,33 @@
         ]
       }
     },
+    "/api/categories/by-type/{type}": {
+      "get": {
+        "operationId": "CategoriesController_findAllByType",
+        "parameters": [
+          {
+            "name": "type",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return categories filtered by type"
+          },
+          "400": {
+            "description": "Invalid category type"
+          }
+        },
+        "summary": "Get categories by type",
+        "tags": [
+          "categories"
+        ]
+      }
+    },
     "/api/categories/{id}": {
       "get": {
         "operationId": "CategoriesController_findOne",
@@ -1995,12 +2022,7 @@
             "description": "Images uploaded successfully"
           }
         },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Upload nhiều ảnh (admin only)",
+        "summary": "Upload nhiều ảnh",
         "tags": [
           "upload-images"
         ]

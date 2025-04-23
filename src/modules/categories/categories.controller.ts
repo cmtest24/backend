@@ -40,6 +40,16 @@ export class CategoriesController {
     return this.categoriesService.findAll();
   }
 
+  @Get('by-type/:type')
+  @ApiOperation({ summary: 'Get categories by type' })
+  @ApiResponse({ status: 200, description: 'Return categories filtered by type' })
+  @ApiResponse({ status: 400, description: 'Invalid category type' })
+  findAllByType(@Param('type') type: string) {
+    // Assuming type is a string representation of CategoryType enum
+    // Need to validate and convert the type string to CategoryType enum in the service
+    return this.categoriesService.findAll(type as any); // Cast to any for now, validation in service
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get a category by ID with products' })
   @ApiResponse({ status: 200, description: 'Return the category with products' })

@@ -24,8 +24,6 @@ export class UploadImagesController {
    * Upload nhiều ảnh, lưu vào public/products, trả về URL
    */
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
   @UseInterceptors(
     FilesInterceptor('images', undefined, {
       storage: diskStorage({
@@ -50,7 +48,7 @@ export class UploadImagesController {
       limits: { fileSize: 5 * 1024 * 1024 }, // 5MB/file
     })
   )
-  @ApiOperation({ summary: 'Upload nhiều ảnh (admin only)' })
+  @ApiOperation({ summary: 'Upload nhiều ảnh' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -64,7 +62,6 @@ export class UploadImagesController {
       }
     }
   })
-  @ApiBearerAuth()
   @ApiResponse({ status: 201, description: 'Images uploaded successfully' })
   async uploadImages(
     @UploadedFiles() files: Array<Express.Multer.File>,

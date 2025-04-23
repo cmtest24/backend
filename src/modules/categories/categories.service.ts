@@ -48,8 +48,17 @@ export class CategoriesService {
     }
   }
 
-  async findAll(type?: CategoryType): Promise<Category[]> {
-    const cacheKey = type ? `categories_${type}` : 'categories_all';
+  async findAll(type?: CategoryType | string): Promise<Category[]> {
+    let categoryType: CategoryType | undefined;
+    if (type) {
+      if (Object.values(CategoryType).includes(type as CategoryType)) {
+        categoryType = type as CategoryType;
+      } else {
+        throw new NotFoundException(`Invalid category type: ${type}`);
+      }
+    }
+
+    const cacheKey = categoryType ? `categories_${categoryType}` : 'categories_all';
     // Try to get from cache first
     const cachedCategories = await this.cacheManager.get<Category[]>(cacheKey);
     if (cachedCategories) {
