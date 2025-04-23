@@ -24,6 +24,9 @@ import { ContactModule } from './modules/contact/contact.module';
 import { PromotionsModule } from './modules/promotions/promotions.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { UploadImagesModule } from './modules/upload-images/upload-images.module';
+import { BannersModule } from './modules/banners/banners.module';
+import { StoreInfoModule } from './modules/store-info/store-info.module';
+import { VideosModule } from './modules/videos/videos.module';
 
 @Module({
   imports: [
@@ -89,6 +92,9 @@ import { UploadImagesModule } from './modules/upload-images/upload-images.module
     PromotionsModule,
     SubscriptionsModule,
   UploadImagesModule,
+  BannersModule,
+  StoreInfoModule,
+  VideosModule,
   ],
 })
 export class AppModule {}

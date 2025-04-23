@@ -11,7 +11,7 @@ export enum SortField {
   PRICE = 'price',
   NAME = 'name',
   CREATED_AT = 'createdAt',
-  AVERAGE_RATING = 'averageRating',
+  UPDATED_AT = 'updatedAt',
 }
 
 export class QueryProductDto {
@@ -38,16 +38,6 @@ export class QueryProductDto {
   @IsNumber()
   @Min(0)
   maxPrice?: number;
-
-  @ApiPropertyOptional({ description: 'Tag to filter products' })
-  @IsOptional()
-  @IsString()
-  tag?: string;
-
-  @ApiPropertyOptional({ description: 'Only include featured products', default: false })
-  @IsOptional()
-  @Type(() => Boolean)
-  featured?: boolean;
 
   @ApiPropertyOptional({ description: 'Field to sort by', enum: SortField, default: SortField.CREATED_AT })
   @IsOptional()

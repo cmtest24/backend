@@ -1,8 +1,14 @@
-import { IsString, IsOptional, IsBoolean, IsNumber } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsNumber, IsEnum, IsUUID } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { CategoryType } from '../enums/category-type.enum';
 
 export class UpdateCategoryDto {
-  @ApiPropertyOptional({ description: 'Name of the category' })
+  @ApiPropertyOptional({ description: 'Loại danh mục (product, service, post, video)' })
+  @IsOptional()
+  @IsEnum(CategoryType)
+  type?: CategoryType;
+
+  @ApiPropertyOptional({ description: 'Tên danh mục' })
   @IsOptional()
   @IsString()
   name?: string;
@@ -26,4 +32,9 @@ export class UpdateCategoryDto {
   @IsOptional()
   @IsNumber()
   sortOrder?: number;
+
+  @ApiPropertyOptional({ description: 'ID danh mục cha (nếu có)' })
+  @IsOptional()
+  @IsUUID()
+  parentId?: string | null; // Cho phép null để xóa danh mục cha
 }

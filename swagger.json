@@ -633,25 +633,6 @@
             }
           },
           {
-            "name": "tag",
-            "required": false,
-            "in": "query",
-            "description": "Tag to filter products",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "featured",
-            "required": false,
-            "in": "query",
-            "description": "Only include featured products",
-            "schema": {
-              "default": false,
-              "type": "boolean"
-            }
-          },
-          {
             "name": "sortBy",
             "required": false,
             "in": "query",
@@ -663,7 +644,7 @@
                 "price",
                 "name",
                 "createdAt",
-                "averageRating"
+                "updatedAt"
               ]
             }
           },
@@ -2030,6 +2011,373 @@
           "upload-images"
         ]
       }
+    },
+    "/api/banners": {
+      "post": {
+        "operationId": "BannersController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBannerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Banner đã được tạo thành công."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Tạo banner mới (admin only)",
+        "tags": [
+          "banners"
+        ]
+      },
+      "get": {
+        "operationId": "BannersController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Trả về danh sách tất cả banner."
+          }
+        },
+        "summary": "Lấy tất cả banner",
+        "tags": [
+          "banners"
+        ]
+      }
+    },
+    "/api/banners/{id}": {
+      "get": {
+        "operationId": "BannersController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Trả về banner theo ID."
+          },
+          "404": {
+            "description": "Không tìm thấy banner."
+          }
+        },
+        "summary": "Lấy banner theo ID",
+        "tags": [
+          "banners"
+        ]
+      },
+      "put": {
+        "operationId": "BannersController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBannerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Banner đã được cập nhật thành công."
+          },
+          "404": {
+            "description": "Không tìm thấy banner."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cập nhật banner theo ID (admin only)",
+        "tags": [
+          "banners"
+        ]
+      },
+      "delete": {
+        "operationId": "BannersController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Banner đã được xóa thành công."
+          },
+          "404": {
+            "description": "Không tìm thấy banner."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Xóa banner theo ID (admin only)",
+        "tags": [
+          "banners"
+        ]
+      }
+    },
+    "/api/store-info": {
+      "get": {
+        "operationId": "StoreInfoController_getStoreInfo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Return store information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoreInfoDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get store information",
+        "tags": [
+          "store-info"
+        ]
+      }
+    },
+    "/api/videos": {
+      "post": {
+        "operationId": "VideosController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateVideoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Video created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VideoDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create a new video",
+        "tags": [
+          "videos"
+        ]
+      },
+      "get": {
+        "operationId": "VideosController_findAll",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search term for video title",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Field to sort by",
+            "schema": {
+              "default": "createdAt",
+              "type": "string",
+              "enum": [
+                "tieuDe",
+                "createdAt",
+                "updatedAt"
+              ]
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "description": "Sort order",
+            "schema": {
+              "default": "DESC",
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number for pagination",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Number of items per page",
+            "schema": {
+              "default": 10,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return videos with pagination info"
+          }
+        },
+        "summary": "Get all videos with pagination and filtering",
+        "tags": [
+          "videos"
+        ]
+      }
+    },
+    "/api/videos/{id}": {
+      "get": {
+        "operationId": "VideosController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return the video",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VideoDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Video not found"
+          }
+        },
+        "summary": "Get a video by ID",
+        "tags": [
+          "videos"
+        ]
+      },
+      "put": {
+        "operationId": "VideosController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVideoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Video updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VideoDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Video not found"
+          }
+        },
+        "summary": "Update a video by ID",
+        "tags": [
+          "videos"
+        ]
+      },
+      "delete": {
+        "operationId": "VideosController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Video deleted successfully"
+          },
+          "404": {
+            "description": "Video not found"
+          }
+        },
+        "summary": "Delete a video by ID",
+        "tags": [
+          "videos"
+        ]
+      }
     }
   },
   "info": {
@@ -2285,6 +2633,10 @@
             "type": "string",
             "description": "Detailed description of the product"
           },
+          "longDescription": {
+            "type": "string",
+            "description": "Long description of the product"
+          },
           "price": {
             "type": "number",
             "description": "Regular price of the product"
@@ -2292,10 +2644,6 @@
           "salePrice": {
             "type": "number",
             "description": "Sale price of the product"
-          },
-          "stockQuantity": {
-            "type": "number",
-            "description": "Stock quantity of the product"
           },
           "imageUrl": {
             "type": "string",
@@ -2308,35 +2656,6 @@
               "type": "string"
             }
           },
-          "tags": {
-            "description": "Tags associated with the product",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "isActive": {
-            "type": "boolean",
-            "description": "Whether the product is active",
-            "default": true
-          },
-          "isFeatured": {
-            "type": "boolean",
-            "description": "Whether the product is featured",
-            "default": false
-          },
-          "specifications": {
-            "type": "string",
-            "description": "Product specifications in detail"
-          },
-          "usageInstructions": {
-            "type": "string",
-            "description": "Usage instructions for the product"
-          },
-          "sku": {
-            "type": "string",
-            "description": "Stock keeping unit (SKU)"
-          },
           "categoryId": {
             "type": "string",
             "description": "Category ID the product belongs to"
@@ -2345,8 +2664,7 @@
         "required": [
           "name",
           "description",
-          "price",
-          "stockQuantity"
+          "price"
         ]
       },
       "UpdateProductDto": {
@@ -2360,6 +2678,10 @@
             "type": "string",
             "description": "Detailed description of the product"
           },
+          "longDescription": {
+            "type": "string",
+            "description": "Long description of the product"
+          },
           "price": {
             "type": "number",
             "description": "Regular price of the product"
@@ -2367,10 +2689,6 @@
           "salePrice": {
             "type": "number",
             "description": "Sale price of the product"
-          },
-          "stockQuantity": {
-            "type": "number",
-            "description": "Stock quantity of the product"
           },
           "imageUrl": {
             "type": "string",
@@ -2383,33 +2701,6 @@
               "type": "string"
             }
           },
-          "tags": {
-            "description": "Tags associated with the product",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "isActive": {
-            "type": "boolean",
-            "description": "Whether the product is active"
-          },
-          "isFeatured": {
-            "type": "boolean",
-            "description": "Whether the product is featured"
-          },
-          "specifications": {
-            "type": "string",
-            "description": "Product specifications in detail"
-          },
-          "usageInstructions": {
-            "type": "string",
-            "description": "Usage instructions for the product"
-          },
-          "sku": {
-            "type": "string",
-            "description": "Stock keeping unit (SKU)"
-          },
           "categoryId": {
             "type": "string",
             "description": "Category ID the product belongs to"
@@ -2419,39 +2710,52 @@
       "CreateCategoryDto": {
         "type": "object",
         "properties": {
+          "type": {
+            "type": "string",
+            "description": "Loại danh mục (product, service, post, video)"
+          },
           "name": {
             "type": "string",
-            "description": "Name of the category"
+            "description": "Tên danh mục"
           },
           "description": {
             "type": "string",
-            "description": "Description of the category"
+            "description": "Mô tả danh mục"
           },
           "imageUrl": {
             "type": "string",
-            "description": "URL to the category image"
+            "description": "URL ảnh danh mục"
           },
           "isActive": {
             "type": "boolean",
-            "description": "Whether the category is active",
+            "description": "Trạng thái hoạt động",
             "default": true
           },
           "sortOrder": {
             "type": "number",
-            "description": "Order for sorting categories",
+            "description": "Thứ tự sắp xếp",
             "default": 0
+          },
+          "parentId": {
+            "type": "string",
+            "description": "ID danh mục cha (nếu có)"
           }
         },
         "required": [
+          "type",
           "name"
         ]
       },
       "UpdateCategoryDto": {
         "type": "object",
         "properties": {
+          "type": {
+            "type": "string",
+            "description": "Loại danh mục (product, service, post, video)"
+          },
           "name": {
             "type": "string",
-            "description": "Name of the category"
+            "description": "Tên danh mục"
           },
           "description": {
             "type": "string",
@@ -2468,6 +2772,10 @@
           "sortOrder": {
             "type": "number",
             "description": "Order for sorting categories"
+          },
+          "parentId": {
+            "type": "string",
+            "description": "ID danh mục cha (nếu có)"
           }
         }
       },
@@ -2863,6 +3171,156 @@
         "required": [
           "email"
         ]
+      },
+      "CreateBannerDto": {
+        "type": "object",
+        "properties": {
+          "imageUrl": {
+            "type": "string",
+            "description": "URL ảnh banner"
+          },
+          "shortTitle": {
+            "type": "string",
+            "description": "Tiêu đề ngắn của banner"
+          },
+          "longTitle": {
+            "type": "string",
+            "description": "Tiêu đề dài của banner"
+          },
+          "link": {
+            "type": "string",
+            "description": "Link khi click vào banner"
+          },
+          "order": {
+            "type": "number",
+            "description": "Số thứ tự hiển thị banner"
+          }
+        },
+        "required": [
+          "imageUrl",
+          "shortTitle",
+          "longTitle",
+          "order"
+        ]
+      },
+      "StoreInfoDto": {
+        "type": "object",
+        "properties": {
+          "logo": {
+            "type": "string",
+            "description": "URL to the store logo",
+            "nullable": true
+          },
+          "favicon": {
+            "type": "string",
+            "description": "URL to the store favicon",
+            "nullable": true
+          },
+          "facebook": {
+            "type": "string",
+            "description": "Facebook page URL",
+            "nullable": true
+          },
+          "youtube": {
+            "type": "string",
+            "description": "YouTube channel URL",
+            "nullable": true
+          },
+          "googleMap": {
+            "type": "string",
+            "description": "Google Map link",
+            "nullable": true
+          },
+          "hotline": {
+            "type": "string",
+            "description": "Store hotline number",
+            "nullable": true
+          },
+          "zalo": {
+            "type": "string",
+            "description": "Zalo contact information",
+            "nullable": true
+          },
+          "workingHours": {
+            "type": "string",
+            "description": "Store working hours",
+            "nullable": true
+          }
+        },
+        "required": [
+          "logo",
+          "favicon",
+          "facebook",
+          "youtube",
+          "googleMap",
+          "hotline",
+          "zalo",
+          "workingHours"
+        ]
+      },
+      "CreateVideoDto": {
+        "type": "object",
+        "properties": {
+          "tieuDe": {
+            "type": "string",
+            "description": "Title of the video"
+          },
+          "linkYtb": {
+            "type": "string",
+            "description": "YouTube link of the video"
+          }
+        },
+        "required": [
+          "tieuDe",
+          "linkYtb"
+        ]
+      },
+      "VideoDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier of the video"
+          },
+          "tieuDe": {
+            "type": "string",
+            "description": "Title of the video"
+          },
+          "linkYtb": {
+            "type": "string",
+            "description": "YouTube link of the video"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Creation timestamp"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Last update timestamp"
+          }
+        },
+        "required": [
+          "id",
+          "tieuDe",
+          "linkYtb",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UpdateVideoDto": {
+        "type": "object",
+        "properties": {
+          "tieuDe": {
+            "type": "string",
+            "description": "Title of the video"
+          },
+          "linkYtb": {
+            "type": "string",
+            "description": "YouTube link of the video"
+          }
+        }
       }
     }
   }

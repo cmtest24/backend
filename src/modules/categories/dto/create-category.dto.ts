@@ -1,29 +1,40 @@
-import { IsNotEmpty, IsString, IsOptional, IsBoolean, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsBoolean, IsNumber, IsEnum, IsUUID } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { CategoryType } from '../enums/category-type.enum';
 
 export class CreateCategoryDto {
-  @ApiProperty({ description: 'Name of the category' })
+  @ApiProperty({ description: 'Loại danh mục (product, service, post, video)' })
+  @IsNotEmpty()
+  @IsEnum(CategoryType)
+  type: CategoryType;
+
+  @ApiProperty({ description: 'Tên danh mục' })
   @IsNotEmpty()
   @IsString()
   name: string;
 
-  @ApiPropertyOptional({ description: 'Description of the category' })
+  @ApiPropertyOptional({ description: 'Mô tả danh mục' })
   @IsOptional()
   @IsString()
   description?: string;
 
-  @ApiPropertyOptional({ description: 'URL to the category image' })
+  @ApiPropertyOptional({ description: 'URL ảnh danh mục' })
   @IsOptional()
   @IsString()
   imageUrl?: string;
 
-  @ApiPropertyOptional({ description: 'Whether the category is active', default: true })
+  @ApiPropertyOptional({ description: 'Trạng thái hoạt động', default: true })
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
 
-  @ApiPropertyOptional({ description: 'Order for sorting categories', default: 0 })
+  @ApiPropertyOptional({ description: 'Thứ tự sắp xếp', default: 0 })
   @IsOptional()
   @IsNumber()
   sortOrder?: number;
+
+  @ApiPropertyOptional({ description: 'ID danh mục cha (nếu có)' })
+  @IsOptional()
+  @IsUUID()
+  parentId?: string;
 }

@@ -24,41 +24,20 @@ export class Product {
   @Column('text')
   description: string;
 
+  @Column('text', { nullable: true })
+  longDescription: string;
+
   @Column('decimal', { precision: 10, scale: 2 })
   price: number;
 
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
   salePrice: number;
 
-  @Column('int', { default: 0 })
-  stockQuantity: number;
-
   @Column({ nullable: true })
   imageUrl: string;
 
   @Column('simple-array', { nullable: true })
   additionalImages: string[];
-
-  @Column('simple-array', { nullable: true })
-  tags: string[];
-
-  @Column({ default: true })
-  isActive: boolean;
-
-  @Column({ default: false })
-  isFeatured: boolean;
-
-  @Column({ default: 0 })
-  viewCount: number;
-
-  @Column('text', { nullable: true })
-  specifications: string;
-
-  @Column('text', { nullable: true })
-  usageInstructions: string;
-
-  @Column({ nullable: true })
-  sku: string;
 
   @Column({ nullable: true })
   categoryId: string;
@@ -75,12 +54,6 @@ export class Product {
 
   @OneToMany(() => OrderItem, (orderItem) => orderItem.product)
   orderItems: OrderItem[];
-
-  @Column('decimal', { precision: 3, scale: 1, default: 0 })
-  averageRating: number;
-
-  @Column('int', { default: 0 })
-  reviewCount: number;
 
   @CreateDateColumn()
   createdAt: Date;

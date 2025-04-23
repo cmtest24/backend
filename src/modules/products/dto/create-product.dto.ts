@@ -23,6 +23,11 @@ export class CreateProductDto {
   @IsString()
   description: string;
 
+  @ApiPropertyOptional({ description: 'Long description of the product' })
+  @IsOptional()
+  @IsString()
+  longDescription?: string;
+
   @ApiProperty({ description: 'Regular price of the product' })
   @IsNotEmpty()
   @IsNumber({ maxDecimalPlaces: 2 })
@@ -34,12 +39,6 @@ export class CreateProductDto {
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
   salePrice?: number;
-
-  @ApiProperty({ description: 'Stock quantity of the product' })
-  @IsNotEmpty()
-  @IsNumber()
-  @Min(0)
-  stockQuantity: number;
 
   @ApiPropertyOptional({ description: 'URL to the main product image' })
   @IsOptional()
@@ -62,36 +61,6 @@ export class CreateProductDto {
     });
   })
   additionalImages?: string[];
-
-  @ApiPropertyOptional({ description: 'Tags associated with the product' })
-  @IsOptional()
-  @IsArray()
-  tags?: string[];
-
-  @ApiPropertyOptional({ description: 'Whether the product is active', default: true })
-  @IsOptional()
-  @IsBoolean()
-  isActive?: boolean;
-
-  @ApiPropertyOptional({ description: 'Whether the product is featured', default: false })
-  @IsOptional()
-  @IsBoolean()
-  isFeatured?: boolean;
-
-  @ApiPropertyOptional({ description: 'Product specifications in detail' })
-  @IsOptional()
-  @IsString()
-  specifications?: string;
-
-  @ApiPropertyOptional({ description: 'Usage instructions for the product' })
-  @IsOptional()
-  @IsString()
-  usageInstructions?: string;
-
-  @ApiPropertyOptional({ description: 'Stock keeping unit (SKU)' })
-  @IsOptional()
-  @IsString()
-  sku?: string;
 
   @ApiPropertyOptional({ description: 'Category ID the product belongs to' })
   @IsOptional()

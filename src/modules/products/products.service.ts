@@ -35,14 +35,12 @@ export class ProductsService {
       return cachedResult as { products: Product[]; total: number };
     }
     
-    const { 
-      search, 
-      categoryId, 
-      minPrice, 
-      maxPrice, 
-      tag, 
-      featured, 
-      sortBy = SortField.CREATED_AT, 
+    const {
+      search,
+      categoryId,
+      minPrice,
+      maxPrice,
+      sortBy = SortField.CREATED_AT,
       sortOrder = SortOrder.DESC,
       page = 1,
       limit = 10
@@ -69,18 +67,6 @@ export class ProductsService {
       where.price = Between(0, maxPrice);
     }
     
-    if (tag) {
-      // This is simplified, in real-world would need a more complex query for array containment
-      where.tags = Like(`%${tag}%`);
-    }
-    
-    if (featured !== undefined) {
-      where.isFeatured = featured;
-    }
-    
-    // Default to active products
-    where.isActive = true;
-    
     const order: any = {};
     order[sortBy] = sortOrder;
     
@@ -100,28 +86,6 @@ export class ProductsService {
     return result;
   }
 
-  async findFeatured(): Promise<Product[]> {
-    const cacheKey = 'featured_products';
-    
-    // Try to get from cache first
-    const cachedProducts = await this.cacheManager.get<Product[]>(cacheKey);
-    if (cachedProducts) {
-      return cachedProducts;
-    }
-    
-    const products = await this.productsRepository.find({
-      where: { isFeatured: true, isActive: true },
-      order: { createdAt: 'DESC' },
-      take: 10,
-      relations: ['category'],
-    });
-    
-    // Cache the result
-    await this.cacheManager.set(cacheKey, products, 3600); // Cache for 1 hour
-    
-    return products;
-  }
-
   async findOne(id: string): Promise<Product> {
     const cacheKey = `product_${id}`;
     
@@ -139,10 +103,6 @@ export class ProductsService {
     if (!product) {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
-    
-    // Increment view count
-    product.viewCount += 1;
-    await this.productsRepository.save(product);
     
     // Cache the result
     await this.cacheManager.set(cacheKey, product, 1800); // Cache for 30 minutes
@@ -173,29 +133,6 @@ export class ProductsService {
     // Clear cache
     await this.clearCache();
     await this.cacheManager.del(`product_${id}`);
-  }
-  
-  async updateRating(productId: string): Promise<void> {
-    // Calculate new average rating
-    const result = await this.productsRepository
-      .createQueryBuilder('product')
-      .leftJoin('product.reviews', 'review')
-      .select('AVG(review.rating)', 'avg')
-      .addSelect('COUNT(review.id)', 'count')
-      .where('product.id = :productId', { productId })
-      .getRawOne();
-    
-    const averageRating = result.avg ? parseFloat(result.avg) : 0;
-    const reviewCount = result.count ? parseInt(result.count) : 0;
-    
-    // Update the product
-    await this.productsRepository.update(productId, {
-      averageRating: averageRating,
-      reviewCount: reviewCount,
-    });
-    
-    // Clear cache
-    await this.cacheManager.del(`product_${productId}`);
   }
   
   private async clearCache(): Promise<void> {

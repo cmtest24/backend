@@ -8,13 +8,14 @@ import {
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { Express } from 'express';
 import { diskStorage } from 'multer';
-import { extname } from 'path';
+import * as path from 'path';
 import * as fs from 'fs';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/constants/role.enum';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import * as sharp from 'sharp';
 
 @ApiTags('upload-images')
 @Controller('upload-images')
@@ -29,15 +30,15 @@ export class UploadImagesController {
     FilesInterceptor('images', undefined, {
       storage: diskStorage({
         destination: (req, file, cb) => {
-          const uploadPath = 'public/';
-          if (!fs.existsSync(uploadPath)) {
-            fs.mkdirSync(uploadPath, { recursive: true });
+          const tempUploadPath = 'temp_uploads/'; // Thư mục tạm
+          if (!fs.existsSync(tempUploadPath)) {
+            fs.mkdirSync(tempUploadPath, { recursive: true });
           }
-          cb(null, uploadPath);
+          cb(null, tempUploadPath);
         },
         filename: (req, file, cb) => {
           const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          cb(null, uniqueSuffix + extname(file.originalname));
+          cb(null, uniqueSuffix + path.extname(file.originalname));
         },
       }),
       fileFilter: (req, file, cb) => {
@@ -71,9 +72,47 @@ export class UploadImagesController {
     if (!files || files.length === 0) {
       return { imageUrls: [] };
     }
-    const urls = files.map(
-      (file) => `/public/${file.filename}`
-    );
+
+    const urls: string[] = [];
+    const uploadPath = 'public/';
+    const tempUploadPath = 'temp_uploads/';
+
+    // Ensure final upload directory exists
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+
+    for (const file of files) {
+      const tempFilePath = file.path; // Đường dẫn file tạm do Multer lưu
+      try {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        const newFilename = `${uniqueSuffix}.webp`;
+        const finalFilePath = path.join(uploadPath, newFilename);
+
+        // Read temporary file, convert to WebP, and save to final location
+        await sharp(tempFilePath)
+          .webp({ quality: 80 }) // Adjust quality as needed
+          .toFile(finalFilePath);
+
+        urls.push(`/${uploadPath}${newFilename}`);
+
+      } catch (error) {
+        console.error(`Failed to process file ${file.originalname}:`, error);
+        // Optionally handle the error
+      } finally {
+        // Xóa file tạm sau khi xử lý
+        if (fs.existsSync(tempFilePath)) {
+          fs.unlinkSync(tempFilePath);
+        }
+      }
+    }
+
+    // Xóa thư mục tạm nếu rỗng
+    if (fs.existsSync(tempUploadPath) && fs.readdirSync(tempUploadPath).length === 0) {
+        fs.rmdirSync(tempUploadPath);
+    }
+
+
     return { imageUrls: urls };
   }
 }

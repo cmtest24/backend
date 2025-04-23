@@ -4,11 +4,17 @@ import {
   Column, 
   CreateDateColumn, 
   UpdateDateColumn,
-  OneToMany
+  OneToMany,
+  ManyToOne,
+  Tree,
+  TreeParent,
+  TreeChildren,
 } from 'typeorm';
 import { Product } from '../../products/entities/product.entity';
+import { CategoryType } from '../enums/category-type.enum';
 
 @Entity('categories')
+@Tree('closure-table') // Sử dụng closure-table cho cấu trúc cây
 export class Category {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -22,11 +28,25 @@ export class Category {
   @Column({ nullable: true })
   imageUrl: string;
 
+  @Column({
+    type: 'enum',
+    enum: CategoryType,
+    nullable: false,
+  })
+  type: CategoryType;
+
   @Column({ default: true })
   isActive: boolean;
 
   @Column({ default: 0 })
   sortOrder: number;
+
+  // Quan hệ cha-con
+  @TreeParent()
+  parent: Category;
+
+  @TreeChildren()
+  children: Category[];
 
   @OneToMany(() => Product, (product) => product.category)
   products: Product[];
