@@ -40,8 +40,6 @@ export class ReviewsService {
     const savedReview = await this.reviewsRepository.save(review);
     
     // Update product average rating
-    await this.productsService.updateRating(product.id);
-    
     return savedReview;
   }
 
@@ -89,7 +87,6 @@ export class ReviewsService {
     
     // Update product average rating if rating changed
     if (updateReviewDto.rating) {
-      await this.productsService.updateRating(review.productId);
     }
     
     return updatedReview;
@@ -108,6 +105,5 @@ export class ReviewsService {
     await this.reviewsRepository.remove(review);
     
     // Update product average rating
-    await this.productsService.updateRating(productId);
   }
 }

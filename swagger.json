@@ -694,21 +694,6 @@
         ]
       }
     },
-    "/api/products/featured": {
-      "get": {
-        "operationId": "ProductsController_findFeatured",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Return featured products"
-          }
-        },
-        "summary": "Get featured products",
-        "tags": [
-          "products"
-        ]
-      }
-    },
     "/api/products/{id}": {
       "get": {
         "operationId": "ProductsController_findOne",
@@ -2153,24 +2138,113 @@
       }
     },
     "/api/store-info": {
-      "get": {
-        "operationId": "StoreInfoController_getStoreInfo",
+      "post": {
+        "operationId": "StoreInfoController_create",
         "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Return store information",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StoreInfoDto"
-                }
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateStoreInfoDto"
               }
             }
           }
         },
-        "summary": "Get store information",
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
         "tags": [
-          "store-info"
+          "StoreInfo"
+        ]
+      },
+      "get": {
+        "operationId": "StoreInfoController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "StoreInfo"
+        ]
+      }
+    },
+    "/api/store-info/{id}": {
+      "get": {
+        "operationId": "StoreInfoController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "StoreInfo"
+        ]
+      },
+      "put": {
+        "operationId": "StoreInfoController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStoreInfoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "StoreInfo"
+        ]
+      },
+      "delete": {
+        "operationId": "StoreInfoController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "StoreInfo"
         ]
       }
     },
@@ -2704,10 +2778,6 @@
           "categoryId": {
             "type": "string",
             "description": "Category ID the product belongs to"
-          },
-          "stockQuantity": {
-            "type": "number",
-            "description": "Stock quantity of the product"
           }
         }
       },
@@ -3210,60 +3280,13 @@
           "order"
         ]
       },
-      "StoreInfoDto": {
+      "CreateStoreInfoDto": {
         "type": "object",
-        "properties": {
-          "logo": {
-            "type": "string",
-            "description": "URL to the store logo",
-            "nullable": true
-          },
-          "favicon": {
-            "type": "string",
-            "description": "URL to the store favicon",
-            "nullable": true
-          },
-          "facebook": {
-            "type": "string",
-            "description": "Facebook page URL",
-            "nullable": true
-          },
-          "youtube": {
-            "type": "string",
-            "description": "YouTube channel URL",
-            "nullable": true
-          },
-          "googleMap": {
-            "type": "string",
-            "description": "Google Map link",
-            "nullable": true
-          },
-          "hotline": {
-            "type": "string",
-            "description": "Store hotline number",
-            "nullable": true
-          },
-          "zalo": {
-            "type": "string",
-            "description": "Zalo contact information",
-            "nullable": true
-          },
-          "workingHours": {
-            "type": "string",
-            "description": "Store working hours",
-            "nullable": true
-          }
-        },
-        "required": [
-          "logo",
-          "favicon",
-          "facebook",
-          "youtube",
-          "googleMap",
-          "hotline",
-          "zalo",
-          "workingHours"
-        ]
+        "properties": {}
+      },
+      "UpdateStoreInfoDto": {
+        "type": "object",
+        "properties": {}
       },
       "CreateVideoDto": {
         "type": "object",

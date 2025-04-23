@@ -66,9 +66,4 @@ export class UpdateProductDto {
   @IsString()
   categoryId?: string;
 
-  @ApiPropertyOptional({ description: 'Stock quantity of the product' })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  stockQuantity?: number;
 }

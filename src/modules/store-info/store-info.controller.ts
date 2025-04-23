@@ -1,17 +1,29 @@
-import { Controller, Get } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
 import { StoreInfoService } from './store-info.service';
-import { StoreInfoDto } from './dto/store-info.dto';
+import { CreateStoreInfoDto } from './dto/create-store-info.dto';
+import { UpdateStoreInfoDto } from './dto/update-store-info.dto';
 
-@ApiTags('store-info')
 @Controller('store-info')
 export class StoreInfoController {
   constructor(private readonly storeInfoService: StoreInfoService) {}
 
+  @Post()
+  create(@Body() createStoreInfoDto: CreateStoreInfoDto) {
+    return this.storeInfoService.create(createStoreInfoDto);
+  }
+
   @Get()
-  @ApiOperation({ summary: 'Get store information' })
-  @ApiResponse({ status: 200, description: 'Return store information', type: StoreInfoDto })
-  async getStoreInfo(): Promise<StoreInfoDto> {
-    return this.storeInfoService.getStoreInfo();
+  findOne() {
+    return this.storeInfoService.findOne();
+  }
+
+  @Put()
+  update(@Body() updateStoreInfoDto: UpdateStoreInfoDto) {
+    return this.storeInfoService.update(updateStoreInfoDto);
+  }
+
+  @Delete()
+  remove() {
+    return this.storeInfoService.remove();
   }
 }

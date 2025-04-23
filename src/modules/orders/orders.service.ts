@@ -61,12 +61,6 @@ export class OrdersService {
         for (const cartItem of cart.items) {
           const product = await this.productsService.findOne(cartItem.productId);
           
-          if (product.stockQuantity < cartItem.quantity) {
-            throw new BadRequestException(
-              `Not enough stock for product: ${product.name}. Available: ${product.stockQuantity}`,
-            );
-          }
-          
           // Prepare order items
           const price = product.salePrice || product.price;
           const orderItem = this.orderItemsRepository.create({
@@ -80,11 +74,6 @@ export class OrdersService {
           orderItems.push(orderItem);
           subtotal += orderItem.subtotal;
           
-          // Reduce stock
-          await this.productsService.update(
-            product.id,
-            { stockQuantity: product.stockQuantity - cartItem.quantity },
-          );
         }
         
         // Clear the cart after creating order
@@ -93,12 +82,6 @@ export class OrdersService {
         // Use provided items
         for (const item of createOrderDto.items) {
           const product = await this.productsService.findOne(item.productId);
-          
-          if (product.stockQuantity < item.quantity) {
-            throw new BadRequestException(
-              `Not enough stock for product: ${product.name}. Available: ${product.stockQuantity}`,
-            );
-          }
           
           const price = product.salePrice || product.price;
           const orderItem = this.orderItemsRepository.create({
@@ -112,11 +95,6 @@ export class OrdersService {
           orderItems.push(orderItem);
           subtotal += orderItem.subtotal;
           
-          // Reduce stock
-          await this.productsService.update(
-            product.id,
-            { stockQuantity: product.stockQuantity - item.quantity },
-          );
         }
       } else {
         throw new BadRequestException('No items specified for order');
@@ -196,15 +174,6 @@ export class OrdersService {
     order.status = OrderStatus.CANCELLED;
     order.cancelReason = reason || 'Cancelled by user';
     
-    // Restore product stock
-    for (const item of order.items) {
-      const product = await this.productsService.findOne(item.productId);
-      await this.productsService.update(
-        product.id,
-        { stockQuantity: product.stockQuantity + item.quantity },
-      );
-    }
-    
     return this.ordersRepository.save(order);
   }
 
@@ -236,14 +205,6 @@ export class OrdersService {
       updateStatusDto.status === OrderStatus.CANCELLED && 
       order.status !== OrderStatus.CANCELLED
     ) {
-      for (const item of order.items) {
-        const product = await this.productsService.findOne(item.productId);
-        await this.productsService.update(
-          product.id,
-          { stockQuantity: product.stockQuantity + item.quantity },
-        );
-      }
-      
       order.cancelReason = updateStatusDto.cancelReason || 'Cancelled by admin';
     }
     

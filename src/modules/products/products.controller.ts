@@ -57,13 +57,6 @@ export class ProductsController {
     return this.productsService.findAll(query);
   }
 
-  @Get('featured')
-  @UseInterceptors(CacheInterceptor)
-  @ApiOperation({ summary: 'Get featured products' })
-  @ApiResponse({ status: 200, description: 'Return featured products' })
-  findFeatured() {
-    return this.productsService.findFeatured();
-  }
 
   @Get(':id')
   @UseInterceptors(CacheInterceptor)

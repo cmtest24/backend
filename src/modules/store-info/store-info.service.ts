@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { StoreInfo } from './entities/store-info.entity';
-import { StoreInfoDto } from './dto/store-info.dto';
+import { CreateStoreInfoDto } from './dto/create-store-info.dto';
+import { UpdateStoreInfoDto } from './dto/update-store-info.dto';
 
 @Injectable()
 export class StoreInfoService {
@@ -11,29 +12,40 @@ export class StoreInfoService {
     private storeInfoRepository: Repository<StoreInfo>,
   ) {}
 
-  async getStoreInfo(): Promise<StoreInfoDto> {
-    // Assuming there's only one row for store info, or we take the first one
-    const storeInfo = await this.storeInfoRepository.findOne({ where: {} });
+  async create(createStoreInfoDto: CreateStoreInfoDto): Promise<StoreInfo> {
+    const existingInfo = await this.storeInfoRepository.findOne({ where: {} });
+    if (existingInfo) {
+      throw new ConflictException('Store information already exists. Use update instead.');
+    }
 
+    const storeInfo = this.storeInfoRepository.create(createStoreInfoDto);
+    return this.storeInfoRepository.save(storeInfo);
+  }
+
+  async findOne(): Promise<StoreInfo> {
+    const storeInfo = await this.storeInfoRepository.findOne({ where: {} });
     if (!storeInfo) {
-      // Return default or throw error if info is not found
+      throw new NotFoundException('Store information not found');
+    }
+    return storeInfo;
+  }
+
+  async update(updateStoreInfoDto: UpdateStoreInfoDto): Promise<StoreInfo> {
+    const storeInfo = await this.storeInfoRepository.findOne({ where: {} });
+    if (!storeInfo) {
       throw new NotFoundException('Store information not found');
     }
 
-    // Map entity to DTO
-    const storeInfoDto: StoreInfoDto = {
-      logo: storeInfo.logo,
-      favicon: storeInfo.favicon,
-      facebook: storeInfo.facebook,
-      youtube: storeInfo.youtube,
-      googleMap: storeInfo.googleMap,
-      hotline: storeInfo.hotline,
-      zalo: storeInfo.zalo,
-      workingHours: storeInfo.workingHours,
-    };
-
-    return storeInfoDto;
+    Object.assign(storeInfo, updateStoreInfoDto);
+    return this.storeInfoRepository.save(storeInfo);
   }
 
-  // You might want to add methods for admin to update store info later
+  async remove(): Promise<void> {
+    const storeInfo = await this.storeInfoRepository.findOne({ where: {} });
+    if (!storeInfo) {
+      throw new NotFoundException('Store information not found');
+    }
+
+    await this.storeInfoRepository.remove(storeInfo);
+  }
 }

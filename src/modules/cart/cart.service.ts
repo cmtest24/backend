@@ -20,14 +20,6 @@ export class CartService {
     // Check if product exists and is available
     const product = await this.productsService.findOne(productId);
     
-    if (!product.isActive) {
-      throw new BadRequestException('Product is not available');
-    }
-    
-    if (product.stockQuantity < quantity) {
-      throw new BadRequestException('Not enough stock available');
-    }
-    
     // Check if item already in cart
     let cartItem = await this.cartItemsRepository.findOne({
       where: { userId, productId },
@@ -39,10 +31,6 @@ export class CartService {
       cartItem.quantity += quantity;
       
       // Check if updated quantity exceeds stock
-      if (cartItem.quantity > product.stockQuantity) {
-        throw new BadRequestException('Requested quantity exceeds available stock');
-      }
-      
       return this.cartItemsRepository.save(cartItem);
     }
     
@@ -77,10 +65,6 @@ export class CartService {
     
     // Check if requested quantity is available
     const product = await this.productsService.findOne(cartItem.productId);
-    
-    if (updateCartItemDto.quantity > product.stockQuantity) {
-      throw new BadRequestException('Requested quantity exceeds available stock');
-    }
     
     // Update the cart item
     cartItem.quantity = updateCartItemDto.quantity;

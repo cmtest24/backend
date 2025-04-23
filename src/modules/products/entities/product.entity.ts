@@ -36,12 +36,6 @@ export class Product {
   @Column({ nullable: true })
   imageUrl: string;
 
-  @Column({ default: true })
-  isActive: boolean;
-
-  @Column({ default: 0 })
-  stockQuantity: number;
-
   @Column('simple-array', { nullable: true })
   additionalImages: string[];
 
