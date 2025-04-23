@@ -18,6 +18,11 @@ export class CreateProductDto {
   @IsString()
   name: string;
 
+  @ApiProperty({ description: 'Slug of the product (unique identifier for URL)' })
+  @IsNotEmpty()
+  @IsString()
+  slug: string;
+
   @ApiProperty({ description: 'Detailed description of the product' })
   @IsNotEmpty()
   @IsString()

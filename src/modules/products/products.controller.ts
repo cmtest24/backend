@@ -33,9 +33,7 @@ import { CacheInterceptor } from '../../common/interceptors/cache.interceptor';
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Create a new product (admin only, chỉ nhận JSON, không upload ảnh trực tiếp)' })
+  @ApiOperation({ summary: 'Create a new product (chỉ nhận JSON, không upload ảnh trực tiếp)' })
   @ApiResponse({ status: 201, description: 'Product created successfully' })
   @ApiBearerAuth()
   async create(
@@ -68,9 +66,7 @@ export class ProductsController {
   }
 
   @Put(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Update a product (admin only)' })
+  @ApiOperation({ summary: 'Update a product' })
   @ApiResponse({ status: 200, description: 'Product updated successfully' })
   @ApiResponse({ status: 404, description: 'Product not found' })
   @ApiBearerAuth()
@@ -79,9 +75,7 @@ export class ProductsController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Delete a product (admin only)' })
+  @ApiOperation({ summary: 'Delete a product' })
   @ApiResponse({ status: 200, description: 'Product deleted successfully' })
   @ApiResponse({ status: 404, description: 'Product not found' })
   @ApiBearerAuth()

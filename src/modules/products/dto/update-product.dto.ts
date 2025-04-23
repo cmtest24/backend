@@ -17,6 +17,11 @@ export class UpdateProductDto {
   @IsString()
   name?: string;
 
+  @ApiPropertyOptional({ description: 'Slug of the product (unique identifier for URL)' })
+  @IsOptional()
+  @IsString()
+  slug?: string;
+
   @ApiPropertyOptional({ description: 'Detailed description of the product' })
   @IsOptional()
   @IsString()

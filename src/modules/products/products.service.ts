@@ -37,6 +37,7 @@ export class ProductsService {
     
     const {
       search,
+      slug, // Add slug here
       categoryId,
       minPrice,
       maxPrice,
@@ -55,6 +56,10 @@ export class ProductsService {
       where.name = Like(`%${search}%`);
     }
     
+    if (slug) { // Add slug filter
+      where.slug = slug;
+    }
+
     if (categoryId) {
       where.categoryId = categoryId;
     }

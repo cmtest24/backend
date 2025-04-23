@@ -588,7 +588,7 @@
             "bearer": []
           }
         ],
-        "summary": "Create a new product (admin only, chỉ nhận JSON, không upload ảnh trực tiếp)",
+        "summary": "Create a new product (chỉ nhận JSON, không upload ảnh trực tiếp)",
         "tags": [
           "products"
         ]
@@ -601,6 +601,15 @@
             "required": false,
             "in": "query",
             "description": "Search term for product name or description",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "slug",
+            "required": false,
+            "in": "query",
+            "description": "Slug of the product to filter by",
             "schema": {
               "type": "string"
             }
@@ -755,7 +764,7 @@
             "bearer": []
           }
         ],
-        "summary": "Update a product (admin only)",
+        "summary": "Update a product",
         "tags": [
           "products"
         ]
@@ -785,7 +794,7 @@
             "bearer": []
           }
         ],
-        "summary": "Delete a product (admin only)",
+        "summary": "Delete a product",
         "tags": [
           "products"
         ]
@@ -2161,31 +2170,8 @@
         ]
       },
       "get": {
-        "operationId": "StoreInfoController_findAll",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "StoreInfo"
-        ]
-      }
-    },
-    "/api/store-info/{id}": {
-      "get": {
         "operationId": "StoreInfoController_findOne",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -2197,16 +2183,7 @@
       },
       "put": {
         "operationId": "StoreInfoController_update",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -2228,16 +2205,7 @@
       },
       "delete": {
         "operationId": "StoreInfoController_remove",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -2703,6 +2671,10 @@
             "type": "string",
             "description": "Name of the product"
           },
+          "slug": {
+            "type": "string",
+            "description": "Slug of the product (unique identifier for URL)"
+          },
           "description": {
             "type": "string",
             "description": "Detailed description of the product"
@@ -2737,6 +2709,7 @@
         },
         "required": [
           "name",
+          "slug",
           "description",
           "price"
         ]
@@ -2747,6 +2720,10 @@
           "name": {
             "type": "string",
             "description": "Name of the product"
+          },
+          "slug": {
+            "type": "string",
+            "description": "Slug of the product (unique identifier for URL)"
           },
           "description": {
             "type": "string",
@@ -3282,7 +3259,40 @@
       },
       "CreateStoreInfoDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "logo": {
+            "type": "string",
+            "description": "Store logo URL"
+          },
+          "favicon": {
+            "type": "string",
+            "description": "Store favicon URL"
+          },
+          "facebook": {
+            "type": "string",
+            "description": "Facebook page URL"
+          },
+          "youtube": {
+            "type": "string",
+            "description": "YouTube channel URL"
+          },
+          "googleMap": {
+            "type": "string",
+            "description": "Google Map embed URL"
+          },
+          "hotline": {
+            "type": "string",
+            "description": "Store hotline number"
+          },
+          "zalo": {
+            "type": "string",
+            "description": "Zalo contact information"
+          },
+          "workingHours": {
+            "type": "string",
+            "description": "Store working hours"
+          }
+        }
       },
       "UpdateStoreInfoDto": {
         "type": "object",

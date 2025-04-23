@@ -20,6 +20,11 @@ export class QueryProductDto {
   @IsString()
   search?: string;
 
+  @ApiPropertyOptional({ description: 'Slug of the product to filter by' })
+  @IsOptional()
+  @IsString()
+  slug?: string;
+
   @ApiPropertyOptional({ description: 'Category ID to filter products' })
   @IsOptional()
   @IsString()

@@ -21,6 +21,9 @@ export class Product {
   @Column()
   name: string;
 
+  @Column({ unique: true, nullable: true })
+  slug: string;
+
   @Column('text')
   description: string;
 
