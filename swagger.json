@@ -2704,6 +2704,10 @@
           "categoryId": {
             "type": "string",
             "description": "Category ID the product belongs to"
+          },
+          "stockQuantity": {
+            "type": "number",
+            "description": "Stock quantity of the product"
           }
         }
       },
