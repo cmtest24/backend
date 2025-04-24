@@ -1,11 +1,7 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
 import { BannersService } from './banners.service';
 import { CreateBannerDto } from './dto/create-banner.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../common/guards/roles.guard';
-import { Roles } from '../../common/decorators/roles.decorator';
-import { Role } from '../../common/constants/role.enum';
 
 @ApiTags('banners')
 @Controller('banners')
@@ -13,11 +9,8 @@ export class BannersController {
   constructor(private readonly bannersService: BannersService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Tạo banner mới (admin only)' })
+  @ApiOperation({ summary: 'Tạo banner mới' })
   @ApiResponse({ status: 201, description: 'Banner đã được tạo thành công.' })
-  @ApiBearerAuth()
   create(@Body() createBannerDto: CreateBannerDto) {
     return this.bannersService.create(createBannerDto);
   }
@@ -38,23 +31,17 @@ export class BannersController {
   }
 
   @Put(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Cập nhật banner theo ID (admin only)' })
+  @ApiOperation({ summary: 'Cập nhật banner theo ID' })
   @ApiResponse({ status: 200, description: 'Banner đã được cập nhật thành công.' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy banner.' })
-  @ApiBearerAuth()
   update(@Param('id') id: string, @Body() updateBannerDto: CreateBannerDto) {
     return this.bannersService.update(+id, updateBannerDto);
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Xóa banner theo ID (admin only)' })
+  @ApiOperation({ summary: 'Xóa banner theo ID' })
   @ApiResponse({ status: 200, description: 'Banner đã được xóa thành công.' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy banner.' })
-  @ApiBearerAuth()
   remove(@Param('id') id: string) {
     return this.bannersService.remove(+id);
   }

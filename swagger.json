@@ -2047,12 +2047,7 @@
             "description": "Banner đã được tạo thành công."
           }
         },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Tạo banner mới (admin only)",
+        "summary": "Tạo banner mới",
         "tags": [
           "banners"
         ]
@@ -2127,12 +2122,7 @@
             "description": "Không tìm thấy banner."
           }
         },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Cập nhật banner theo ID (admin only)",
+        "summary": "Cập nhật banner theo ID",
         "tags": [
           "banners"
         ]
@@ -2157,12 +2147,7 @@
             "description": "Không tìm thấy banner."
           }
         },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Xóa banner theo ID (admin only)",
+        "summary": "Xóa banner theo ID",
         "tags": [
           "banners"
         ]
@@ -2579,6 +2564,162 @@
         },
         "tags": [
           "Service"
+        ]
+      }
+    },
+    "/api/team": {
+      "post": {
+        "operationId": "TeamController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTeamDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The team member has been successfully created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Team"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create a new team member",
+        "tags": [
+          "team"
+        ]
+      },
+      "get": {
+        "operationId": "TeamController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of all team members.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Team"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all team members",
+        "tags": [
+          "team"
+        ]
+      }
+    },
+    "/api/team/{id}": {
+      "get": {
+        "operationId": "TeamController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The found team member.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Team"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Team member not found."
+          }
+        },
+        "summary": "Get a team member by ID",
+        "tags": [
+          "team"
+        ]
+      },
+      "patch": {
+        "operationId": "TeamController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTeamDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The team member has been successfully updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Team"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Team member not found."
+          }
+        },
+        "summary": "Update a team member by ID",
+        "tags": [
+          "team"
+        ]
+      },
+      "delete": {
+        "operationId": "TeamController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The team member has been successfully deleted."
+          },
+          "404": {
+            "description": "Team member not found."
+          }
+        },
+        "summary": "Delete a team member by ID",
+        "tags": [
+          "team"
         ]
       }
     }
@@ -3572,6 +3713,49 @@
       "UpdateServiceDto": {
         "type": "object",
         "properties": {}
+      },
+      "CreateTeamDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Tên thành viên nhóm"
+          },
+          "image": {
+            "type": "string",
+            "description": "Đường dẫn ảnh thành viên nhóm"
+          },
+          "description": {
+            "type": "string",
+            "description": "Mô tả về thành viên nhóm"
+          }
+        },
+        "required": [
+          "name",
+          "image",
+          "description"
+        ]
+      },
+      "Team": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateTeamDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Tên thành viên nhóm"
+          },
+          "image": {
+            "type": "string",
+            "description": "Đường dẫn ảnh thành viên nhóm"
+          },
+          "description": {
+            "type": "string",
+            "description": "Mô tả về thành viên nhóm"
+          }
+        }
       }
     }
   }
