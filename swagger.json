@@ -2442,6 +2442,145 @@
           "videos"
         ]
       }
+    },
+    "/api/services": {
+      "post": {
+        "operationId": "ServiceController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateServiceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Service"
+        ]
+      },
+      "get": {
+        "operationId": "ServiceController_findAll",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Số lượng dịch vụ tối đa muốn lấy (mặc định 10)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Số lượng dịch vụ muốn bỏ qua (mặc định 0)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "categoryId",
+            "required": false,
+            "in": "query",
+            "description": "ID của danh mục để lọc dịch vụ",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Service"
+        ]
+      }
+    },
+    "/api/services/{id}": {
+      "get": {
+        "operationId": "ServiceController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Service"
+        ]
+      },
+      "put": {
+        "operationId": "ServiceController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateServiceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Service"
+        ]
+      },
+      "delete": {
+        "operationId": "ServiceController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Service"
+        ]
+      }
     }
   },
   "info": {
@@ -3383,6 +3522,56 @@
             "description": "YouTube link of the video"
           }
         }
+      },
+      "CreateServiceDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Tên dịch vụ"
+          },
+          "slug": {
+            "type": "string",
+            "description": "Slug duy nhất của dịch vụ"
+          },
+          "categoryId": {
+            "type": "string",
+            "description": "ID danh mục dịch vụ"
+          },
+          "description": {
+            "type": "string",
+            "description": "Mô tả ngắn về dịch vụ"
+          },
+          "longdescription": {
+            "type": "string",
+            "description": "Mô tả chi tiết về dịch vụ"
+          },
+          "image": {
+            "type": "string",
+            "description": "URL hình ảnh dịch vụ"
+          },
+          "price": {
+            "type": "number",
+            "description": "Giá dịch vụ"
+          },
+          "salePrice": {
+            "type": "number",
+            "description": "Giá khuyến mãi dịch vụ"
+          }
+        },
+        "required": [
+          "name",
+          "slug",
+          "categoryId",
+          "description",
+          "longdescription",
+          "image",
+          "price"
+        ]
+      },
+      "UpdateServiceDto": {
+        "type": "object",
+        "properties": {}
       }
     }
   }

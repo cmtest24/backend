@@ -27,6 +27,7 @@ import { UploadImagesModule } from './modules/upload-images/upload-images.module
 import { BannersModule } from './modules/banners/banners.module';
 import { StoreInfoModule } from './modules/store-info/store-info.module';
 import { VideosModule } from './modules/videos/videos.module';
+import { ServiceModule } from './modules/service/service.module';
 
 @Module({
   imports: [
@@ -95,6 +96,7 @@ import { VideosModule } from './modules/videos/videos.module';
   BannersModule,
   StoreInfoModule,
   VideosModule,
+  ServiceModule,
   ],
 })
 export class AppModule {}

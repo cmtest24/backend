@@ -13,7 +13,10 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   
   // Enable CORS
-  app.enableCors();
+  app.enableCors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+  });
 
   // Serve static files
   app.useStaticAssets(join(__dirname, '..', 'public'), {
