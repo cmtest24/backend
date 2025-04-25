@@ -10,9 +10,10 @@ export class CreateBannerDto {
   @IsString()
   shortTitle: string;
 
-  @ApiProperty({ description: 'Tiêu đề dài của banner' })
+  @ApiProperty({ description: 'Tiêu đề dài của banner', required: false })
+  @IsOptional()
   @IsString()
-  longTitle: string;
+  longTitle?: string;
 
   @ApiProperty({ description: 'Link khi click vào banner', required: false })
   @IsOptional()

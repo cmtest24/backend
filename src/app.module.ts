@@ -5,6 +5,8 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-store';
 import { JwtModule } from '@nestjs/jwt';
 
+import { AboutModule } from './modules/about/about.module';
+
 import { databaseConfig } from './config/database.config';
 import { redisConfig } from './config/redis.config';
 import { jwtConfig } from './config/jwt.config';
@@ -104,6 +106,7 @@ import { TeamModule } from './modules/team/team.module';
   TeamModule,
   PolicyModule,
   FaqModule,
+  AboutModule,
   ],
 })
 export class AppModule {}

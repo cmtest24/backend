@@ -6,6 +6,7 @@ import { Cache } from 'cache-manager';
 import { Post } from './entities/post.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class PostsService {
@@ -13,6 +14,7 @@ export class PostsService {
     @InjectRepository(Post)
     private postsRepository: Repository<Post>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private configService: ConfigService,
   ) {}
 
   async create(createPostDto: CreatePostDto): Promise<Post> {
@@ -57,7 +59,15 @@ export class PostsService {
     // Try to get from cache first
     const cachedResult = await this.cacheManager.get(cacheKey);
     if (cachedResult) {
-      return cachedResult as { posts: Post[]; total: number };
+      // Prepend URL to cached results before returning
+      const baseUrl = this.configService.get<string>('DOMAIN');
+      const result = cachedResult as { posts: Post[]; total: number };
+      result.posts.forEach(post => {
+        if (post.imageUrl && !post.imageUrl.startsWith('http')) {
+          post.imageUrl = `${baseUrl}${post.imageUrl}`;
+        }
+      });
+      return result;
     }
     
     const skip = (page - 1) * limit;
@@ -81,18 +91,36 @@ export class PostsService {
       take: limit,
     });
     
+    // Prepend URL to fetched posts
+    const baseUrl = this.configService.get<string>('DOMAIN');
+    posts.forEach(post => {
+      if (post.imageUrl && !post.imageUrl.startsWith('http')) {
+        post.imageUrl = `${baseUrl}${post.imageUrl}`;
+      }
+    });
+
     const result = { posts, total };
-    
-    // Cache the result
+
+    // Cache the result (cache the modified result)
     await this.cacheManager.set(cacheKey, result, 1800); // Cache for 30 minutes
-    
+
     return result;
   }
 
   async findAllAdmin(): Promise<Post[]> {
-    return this.postsRepository.find({
+    const posts = await this.postsRepository.find({
       order: { createdAt: 'DESC' },
     });
+
+    // Prepend URL to fetched posts
+    const baseUrl = this.configService.get<string>('DOMAIN');
+    posts.forEach(post => {
+      if (post.imageUrl && !post.imageUrl.startsWith('http')) {
+        post.imageUrl = `${baseUrl}${post.imageUrl}`;
+      }
+    });
+
+    return posts;
   }
 
   async findBySlug(slug: string): Promise<Post> {
@@ -101,6 +129,11 @@ export class PostsService {
     // Try to get from cache first
     const cachedPost = await this.cacheManager.get<Post>(cacheKey);
     if (cachedPost) {
+      // Prepend URL to cached post before returning
+      const baseUrl = this.configService.get<string>('DOMAIN');
+      if (cachedPost.imageUrl && !cachedPost.imageUrl.startsWith('http')) {
+        cachedPost.imageUrl = `${baseUrl}${cachedPost.imageUrl}`;
+      }
       return cachedPost;
     }
     
@@ -116,9 +149,15 @@ export class PostsService {
     post.viewCount += 1;
     await this.postsRepository.save(post);
     
-    // Cache the post
+    // Prepend URL to fetched post
+    const baseUrl = this.configService.get<string>('DOMAIN');
+    if (post.imageUrl && !post.imageUrl.startsWith('http')) {
+      post.imageUrl = `${baseUrl}${post.imageUrl}`;
+    }
+
+    // Cache the post (cache the modified post)
     await this.cacheManager.set(cacheKey, post, 3600); // Cache for 1 hour
-    
+
     return post;
   }
 
@@ -129,6 +168,12 @@ export class PostsService {
 
     if (!post) {
       throw new NotFoundException(`Post with ID ${id} not found`);
+    }
+
+    // Prepend URL to fetched post
+    const baseUrl = this.configService.get<string>('DOMAIN');
+    if (post.imageUrl && !post.imageUrl.startsWith('http')) {
+      post.imageUrl = `${baseUrl}${post.imageUrl}`;
     }
 
     return post;

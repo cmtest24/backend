@@ -827,7 +827,7 @@
             "bearer": []
           }
         ],
-        "summary": "Create a new category (admin only)",
+        "summary": "Create a new category",
         "tags": [
           "categories"
         ]
@@ -937,7 +937,7 @@
             "bearer": []
           }
         ],
-        "summary": "Update a category (admin only)",
+        "summary": "Update a category",
         "tags": [
           "categories"
         ]
@@ -967,7 +967,7 @@
             "bearer": []
           }
         ],
-        "summary": "Delete a category (admin only)",
+        "summary": "Delete a category",
         "tags": [
           "categories"
         ]
@@ -1765,12 +1765,7 @@
             "description": "Post not found"
           }
         },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Delete a blog post (admin only)",
+        "summary": "Delete a blog post",
         "tags": [
           "posts"
         ]
@@ -2944,6 +2939,117 @@
           "Faq"
         ]
       }
+    },
+    "/api/about": {
+      "post": {
+        "operationId": "AboutController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAboutDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "About"
+        ]
+      },
+      "get": {
+        "operationId": "AboutController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "About"
+        ]
+      }
+    },
+    "/api/about/{id}": {
+      "get": {
+        "operationId": "AboutController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "About"
+        ]
+      },
+      "patch": {
+        "operationId": "AboutController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAboutDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "About"
+        ]
+      },
+      "delete": {
+        "operationId": "AboutController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "About"
+        ]
+      }
     }
   },
   "info": {
@@ -3777,7 +3883,6 @@
         "required": [
           "imageUrl",
           "shortTitle",
-          "longTitle",
           "order"
         ]
       },
@@ -4018,6 +4123,35 @@
         ]
       },
       "UpdateFaqDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreateAboutDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Tiêu đề của About"
+          },
+          "content": {
+            "type": "string",
+            "description": "Nội dung của About"
+          },
+          "mission": {
+            "type": "string",
+            "description": "Sứ mệnh của công ty"
+          },
+          "vision": {
+            "type": "string",
+            "description": "Tầm nhìn của công ty"
+          },
+          "history": {
+            "type": "string",
+            "description": "Lịch sử của công ty"
+          }
+        }
+      },
+      "UpdateAboutDto": {
         "type": "object",
         "properties": {}
       }

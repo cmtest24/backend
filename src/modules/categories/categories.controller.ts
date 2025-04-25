@@ -23,9 +23,7 @@ export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Create a new category (admin only)' })
+  @ApiOperation({ summary: 'Create a new category' })
   @ApiResponse({ status: 201, description: 'Category created successfully' })
   @ApiResponse({ status: 409, description: 'Category with this name already exists' })
   @ApiBearerAuth()
@@ -59,9 +57,7 @@ export class CategoriesController {
   }
 
   @Put(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Update a category (admin only)' })
+  @ApiOperation({ summary: 'Update a category' })
   @ApiResponse({ status: 200, description: 'Category updated successfully' })
   @ApiResponse({ status: 404, description: 'Category not found' })
   @ApiResponse({ status: 409, description: 'Category with this name already exists' })
@@ -71,9 +67,7 @@ export class CategoriesController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Delete a category (admin only)' })
+  @ApiOperation({ summary: 'Delete a category' })
   @ApiResponse({ status: 200, description: 'Category deleted successfully' })
   @ApiResponse({ status: 404, description: 'Category not found' })
   @ApiBearerAuth()

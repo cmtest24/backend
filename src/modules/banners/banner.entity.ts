@@ -11,10 +11,10 @@ export class Banner {
   @Column()
   shortTitle: string;
 
-  @Column()
+  @Column({ nullable: true })
   longTitle: string;
 
-  @Column()
+  @Column({ nullable: true })
   link: string;
 
   @Column()

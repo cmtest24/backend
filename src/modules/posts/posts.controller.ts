@@ -73,12 +73,9 @@ export class PostsController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Delete a blog post (admin only)' })
+  @ApiOperation({ summary: 'Delete a blog post' })
   @ApiResponse({ status: 200, description: 'Post deleted successfully' })
   @ApiResponse({ status: 404, description: 'Post not found' })
-  @ApiBearerAuth()
   remove(@Param('id') id: string) {
     return this.postsService.remove(id);
   }
