@@ -185,7 +185,15 @@ export class PostsService {
   private async clearCache(): Promise<void> {
     // Clear all posts-related cache
     const store: any = (this.cacheManager as any).store;
-    const keys = await store.keys('posts_*');
-    await Promise.all(keys.map(key => this.cacheManager.del(key)));
+    // Check if store and store.keys exist before calling keys()
+    if (store && typeof store.keys === 'function') {
+      const keys = await store.keys('posts_*');
+      await Promise.all(keys.map(key => this.cacheManager.del(key)));
+    } else {
+      // Log a warning or handle the case where keys() is not available
+      console.warn('Cache store does not support keys() method or store is undefined.');
+      // Depending on the cache store, you might need a different approach to clear cache by pattern
+      // For example, if using cache-manager-redis-store, you might need to access the redis client directly
+    }
   }
 }

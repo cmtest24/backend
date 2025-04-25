@@ -1618,7 +1618,7 @@
             "bearer": []
           }
         ],
-        "summary": "Create a new blog post (admin only)",
+        "summary": "Create a new blog post",
         "tags": [
           "posts"
         ]
@@ -2722,6 +2722,228 @@
           "team"
         ]
       }
+    },
+    "/api/policy": {
+      "post": {
+        "operationId": "PolicyController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePolicyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Policy"
+        ]
+      },
+      "get": {
+        "operationId": "PolicyController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Policy"
+        ]
+      }
+    },
+    "/api/policy/{id}": {
+      "get": {
+        "operationId": "PolicyController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Policy"
+        ]
+      },
+      "put": {
+        "operationId": "PolicyController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePolicyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Policy"
+        ]
+      },
+      "delete": {
+        "operationId": "PolicyController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Policy"
+        ]
+      }
+    },
+    "/api/faq": {
+      "post": {
+        "operationId": "FaqController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFaqDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Faq"
+        ]
+      },
+      "get": {
+        "operationId": "FaqController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Faq"
+        ]
+      }
+    },
+    "/api/faq/{id}": {
+      "get": {
+        "operationId": "FaqController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Faq"
+        ]
+      },
+      "put": {
+        "operationId": "FaqController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFaqDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Faq"
+        ]
+      },
+      "delete": {
+        "operationId": "FaqController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Faq"
+        ]
+      }
     }
   },
   "info": {
@@ -3756,6 +3978,48 @@
             "description": "Mô tả về thành viên nhóm"
           }
         }
+      },
+      "CreatePolicyDto": {
+        "type": "object",
+        "properties": {
+          "tieuDe": {
+            "type": "string",
+            "description": "Tiêu đề chính sách"
+          },
+          "noiDung": {
+            "type": "string",
+            "description": "Nội dung chính sách"
+          }
+        },
+        "required": [
+          "tieuDe",
+          "noiDung"
+        ]
+      },
+      "UpdatePolicyDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreateFaqDto": {
+        "type": "object",
+        "properties": {
+          "tieuDe": {
+            "type": "string",
+            "description": "Tiêu đề FAQ"
+          },
+          "noiDung": {
+            "type": "string",
+            "description": "Nội dung FAQ"
+          }
+        },
+        "required": [
+          "tieuDe",
+          "noiDung"
+        ]
+      },
+      "UpdateFaqDto": {
+        "type": "object",
+        "properties": {}
       }
     }
   }

@@ -26,9 +26,7 @@ export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Create a new blog post (admin only)' })
+  @ApiOperation({ summary: 'Create a new blog post' })
   @ApiResponse({ status: 201, description: 'Post created successfully' })
   @ApiResponse({ status: 409, description: 'Post with this slug already exists' })
   @ApiBearerAuth()

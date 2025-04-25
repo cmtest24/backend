@@ -9,6 +9,9 @@ import { databaseConfig } from './config/database.config';
 import { redisConfig } from './config/redis.config';
 import { jwtConfig } from './config/jwt.config';
 
+import { PolicyModule } from './modules/policy/policy.module';
+import { FaqModule } from './modules/faq/faq.module';
+
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { AddressesModule } from './modules/addresses/addresses.module';
@@ -99,6 +102,8 @@ import { TeamModule } from './modules/team/team.module';
   VideosModule,
   ServiceModule,
   TeamModule,
+  PolicyModule,
+  FaqModule,
   ],
 })
 export class AppModule {}
