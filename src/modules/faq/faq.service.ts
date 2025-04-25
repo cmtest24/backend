@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Faq } from './faq.entity';
@@ -13,6 +13,15 @@ export class FaqService {
   ) {}
 
   async create(createFaqDto: CreateFaqDto): Promise<Faq> {
+    // Check if slug already exists
+    const existingFaq = await this.faqRepository.findOne({
+      where: { slug: createFaqDto.slug },
+    });
+
+    if (existingFaq) {
+      throw new ConflictException('FAQ with this slug already exists');
+    }
+
     const faq = this.faqRepository.create(createFaqDto);
     return this.faqRepository.save(faq);
   }
@@ -29,8 +38,28 @@ export class FaqService {
     return faq;
   }
 
+  async findBySlug(slug: string): Promise<Faq> {
+    const faq = await this.faqRepository.findOne({ where: { slug } });
+    if (!faq) {
+      throw new NotFoundException(`FAQ with slug "${slug}" not found`);
+    }
+    return faq;
+  }
+
   async update(id: number, updateFaqDto: UpdateFaqDto): Promise<Faq> {
     const faq = await this.findOne(id);
+
+    // Check slug uniqueness if changing
+    if (updateFaqDto.slug && updateFaqDto.slug !== faq.slug) {
+      const existingFaq = await this.faqRepository.findOne({
+        where: { slug: updateFaqDto.slug },
+      });
+
+      if (existingFaq && existingFaq.id !== id) {
+        throw new ConflictException('FAQ with this slug already exists');
+      }
+    }
+
     this.faqRepository.merge(faq, updateFaqDto);
     return this.faqRepository.save(faq);
   }

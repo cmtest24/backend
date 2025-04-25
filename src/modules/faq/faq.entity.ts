@@ -10,4 +10,7 @@ export class Faq {
 
   @Column()
   noiDung: string;
+
+  @Column({ unique: true })
+  slug: string;
 }

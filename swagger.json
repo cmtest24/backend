@@ -2829,6 +2829,33 @@
         ]
       }
     },
+    "/api/policy/{slug}": {
+      "get": {
+        "operationId": "PolicyController_findBySlug",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return the policy"
+          },
+          "404": {
+            "description": "Policy not found"
+          }
+        },
+        "summary": "Get a policy by slug",
+        "tags": [
+          "Policy"
+        ]
+      }
+    },
     "/api/faq": {
       "post": {
         "operationId": "FaqController_create",
@@ -2935,6 +2962,33 @@
             "description": ""
           }
         },
+        "tags": [
+          "Faq"
+        ]
+      }
+    },
+    "/api/faq/{slug}": {
+      "get": {
+        "operationId": "FaqController_findBySlug",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return the FAQ"
+          },
+          "404": {
+            "description": "FAQ not found"
+          }
+        },
+        "summary": "Get an FAQ by slug",
         "tags": [
           "Faq"
         ]
@@ -4094,11 +4148,16 @@
           "noiDung": {
             "type": "string",
             "description": "Nội dung chính sách"
+          },
+          "slug": {
+            "type": "string",
+            "description": "Slug cho chính sách"
           }
         },
         "required": [
           "tieuDe",
-          "noiDung"
+          "noiDung",
+          "slug"
         ]
       },
       "UpdatePolicyDto": {
@@ -4115,11 +4174,16 @@
           "noiDung": {
             "type": "string",
             "description": "Nội dung FAQ"
+          },
+          "slug": {
+            "type": "string",
+            "description": "Slug cho FAQ"
           }
         },
         "required": [
           "tieuDe",
-          "noiDung"
+          "noiDung",
+          "slug"
         ]
       },
       "UpdateFaqDto": {

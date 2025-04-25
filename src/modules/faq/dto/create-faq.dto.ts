@@ -9,4 +9,8 @@ export class CreateFaqDto {
   @ApiProperty({ description: 'Nội dung FAQ' })
   @IsString()
   noiDung: string;
+
+  @ApiProperty({ description: 'Slug cho FAQ' })
+  @IsString()
+  slug: string;
 }

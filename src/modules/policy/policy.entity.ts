@@ -10,4 +10,7 @@ export class Policy {
 
   @Column()
   noiDung: string;
+
+  @Column({ unique: true })
+  slug: string;
 }

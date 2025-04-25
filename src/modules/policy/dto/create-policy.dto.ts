@@ -9,4 +9,8 @@ export class CreatePolicyDto {
   @ApiProperty({ description: 'Nội dung chính sách' })
   @IsString()
   noiDung: string;
+
+  @ApiProperty({ description: 'Slug cho chính sách' })
+  @IsString()
+  slug: string;
 }
