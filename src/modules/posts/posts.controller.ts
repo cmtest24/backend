@@ -61,9 +61,7 @@ export class PostsController {
   }
 
   @Put(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Update a blog post (admin only)' })
+  @ApiOperation({ summary: 'Update a blog post' })
   @ApiResponse({ status: 200, description: 'Post updated successfully' })
   @ApiResponse({ status: 404, description: 'Post not found' })
   @ApiResponse({ status: 409, description: 'Post with this slug already exists' })

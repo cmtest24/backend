@@ -44,11 +44,8 @@ export class ServiceService {
 
     const services = await this.serviceRepository.find(findOptions);
 
-    // Prepend base URL and public path to image
-    return services.map(service => ({
-      ...service,
-      image: `${process.env.DOMAIN}${service.image}`,
-    }));
+    // Không tự động nối DOMAIN vào image nữa
+    return services;
   }
 
   async findOne(id: string): Promise<Service> {
@@ -57,11 +54,8 @@ export class ServiceService {
       throw new NotFoundException(`Service with ID "${id}" not found`);
     }
 
-    // Prepend base URL and public path to image
-    return {
-      ...service,
-      image: `${process.env.DOMAIN}/public/${service.image}`,
-    };
+    // Không tự động nối DOMAIN vào image nữa
+    return service;
   }
 
   async findByCategoryId(categoryId: string, limit: number, offset: number): Promise<Service[]> {

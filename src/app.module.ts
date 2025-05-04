@@ -15,19 +15,19 @@ import { PolicyModule } from './modules/policy/policy.module';
 import { FaqModule } from './modules/faq/faq.module';
 
 import { AuthModule } from './modules/auth/auth.module';
-import { UsersModule } from './modules/users/users.module';
-import { AddressesModule } from './modules/addresses/addresses.module';
-import { WishlistModule } from './modules/wishlist/wishlist.module';
+// import { UsersModule } from './modules/users/users.module';
+// import { AddressesModule } from './modules/addresses/addresses.module';
+// import { WishlistModule } from './modules/wishlist/wishlist.module';
 import { ProductsModule } from './modules/products/products.module';
 import { CategoriesModule } from './modules/categories/categories.module';
-import { CartModule } from './modules/cart/cart.module';
-import { OrdersModule } from './modules/orders/orders.module';
-import { PaymentsModule } from './modules/payments/payments.module';
-import { ReviewsModule } from './modules/reviews/reviews.module';
+// import { CartModule } from './modules/cart/cart.module';
+// import { OrdersModule } from './modules/orders/orders.module';
+// import { PaymentsModule } from './modules/payments/payments.module';
+// import { ReviewsModule } from './modules/reviews/reviews.module';
 import { PostsModule } from './modules/posts/posts.module';
 import { ContactModule } from './modules/contact/contact.module';
-import { PromotionsModule } from './modules/promotions/promotions.module';
-import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
+// import { PromotionsModule } from './modules/promotions/promotions.module';
+// import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { UploadImagesModule } from './modules/upload-images/upload-images.module';
 import { BannersModule } from './modules/banners/banners.module';
 import { StoreInfoModule } from './modules/store-info/store-info.module';
@@ -59,6 +59,32 @@ import { TeamModule } from './modules/team/team.module';
         logging: true,
       }),
     }),
+    // Feature Modules
+    AuthModule,
+    CategoriesModule,
+    ProductsModule,
+    ServiceModule,
+    PostsModule,
+    ContactModule,
+    UploadImagesModule,
+    StoreInfoModule,
+    BannersModule,
+    VideosModule,
+    FaqModule,
+    AboutModule,
+    // Các module còn lại đã được comment lại để không sử dụng
+    // UsersModule,
+    // AddressesModule,
+    // WishlistModule,
+    // CartModule,
+    // OrdersModule,
+    // PaymentsModule,
+    // ReviewsModule,
+    // PromotionsModule,
+    // SubscriptionsModule,
+    PolicyModule,
+    TeamModule,
+  
     
     // In-memory Cache for development
     CacheModule.registerAsync({
@@ -85,26 +111,26 @@ import { TeamModule } from './modules/team/team.module';
     
     // Feature modules
     AuthModule,
-    UsersModule,
-    AddressesModule,
-    WishlistModule,
-    ProductsModule,
-    CategoriesModule,
-    CartModule,
-    OrdersModule,
-    PaymentsModule,
-    ReviewsModule,
+    // UsersModule,
+    // AddressesModule,
+    // WishlistModule,
+    // ProductsModule,
+    // CategoriesModule,
+    // CartModule,
+    // OrdersModule,
+    // PaymentsModule,
+    // ReviewsModule,
     PostsModule,
     ContactModule,
-    PromotionsModule,
-    SubscriptionsModule,
+    // PromotionsModule,
+    // SubscriptionsModule,
   UploadImagesModule,
   BannersModule,
   StoreInfoModule,
   VideosModule,
   ServiceModule,
-  TeamModule,
-  PolicyModule,
+  // TeamModule,
+  // PolicyModule,
   FaqModule,
   AboutModule,
   ],

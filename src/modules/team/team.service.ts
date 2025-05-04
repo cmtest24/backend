@@ -19,10 +19,8 @@ export class TeamService {
 
   async findAll(): Promise<Team[]> {
     const teamMembers = await this.teamRepository.find();
-    return teamMembers.map(member => ({
-      ...member,
-      image: `${process.env.DOMAIN}${member.image}`,
-    }));
+    // Không tự động nối DOMAIN vào image nữa
+    return teamMembers;
   }
 
   async findOne(id: number): Promise<Team> {
@@ -30,10 +28,8 @@ export class TeamService {
     if (!teamMember) {
       throw new NotFoundException(`Team member with ID ${id} not found`);
     }
-    return {
-      ...teamMember,
-      image: `${process.env.DOMAIN}/public/${teamMember.image}`,
-    };
+    // Không tự động nối DOMAIN vào image nữa
+    return teamMember;
   }
 
   async update(id: number, updateTeamDto: UpdateTeamDto): Promise<Team> {

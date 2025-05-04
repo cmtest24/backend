@@ -73,6 +73,7 @@ export class UploadImagesController {
     const urls: string[] = [];
     const uploadPath = 'public/';
     const tempUploadPath = 'temp_uploads/';
+    const domain = process.env.DOMAIN || 'http://127.0.0.1:5000';
 
     // Ensure final upload directory exists
     if (!fs.existsSync(uploadPath)) {
@@ -91,7 +92,8 @@ export class UploadImagesController {
           .webp({ quality: 80 }) // Adjust quality as needed
           .toFile(finalFilePath);
 
-        urls.push(`/${uploadPath}${newFilename}`);
+        urls.push(`${domain}/${uploadPath}${newFilename}`.replace(/([^:]\/)\/+/g, '$1/'));
+        // Đảm bảo không bị trùng dấu /
 
       } catch (error) {
         console.error(`Failed to process file ${file.originalname}:`, error);
