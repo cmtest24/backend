@@ -23,7 +23,9 @@ export class StoreInfoService {
   }
 
   async findOne(): Promise<StoreInfo> {
-    const storeInfo = await this.storeInfoRepository.findOne({ where: {} });
+    const storeInfo = await this.storeInfoRepository.findOne({
+      where: {},
+    });
     if (!storeInfo) {
       throw new NotFoundException('Store information not found');
     }
@@ -47,5 +49,53 @@ export class StoreInfoService {
     }
 
     await this.storeInfoRepository.remove(storeInfo);
+  }
+
+  // Phương thức thêm địa chỉ cửa hàng
+  async addAddress(address: { name: string; phoneNumber: string; address: string }): Promise<StoreInfo> {
+    const storeInfo = await this.findOne();
+    
+    // Khởi tạo mảng addresses nếu chưa có
+    if (!storeInfo.addresses) {
+      storeInfo.addresses = [];
+    }
+    
+    // Thêm địa chỉ mới vào mảng
+    storeInfo.addresses.push(address);
+    
+    // Lưu thông tin cửa hàng với địa chỉ mới
+    return this.storeInfoRepository.save(storeInfo);
+  }
+
+  // Phương thức cập nhật địa chỉ cửa hàng
+  async updateAddress(index: number, address: { name: string; phoneNumber: string; address: string }): Promise<StoreInfo> {
+    const storeInfo = await this.findOne();
+    
+    // Kiểm tra xem index có hợp lệ không
+    if (!storeInfo.addresses || index < 0 || index >= storeInfo.addresses.length) {
+      throw new NotFoundException(`Address at index ${index} not found`);
+    }
+    
+    // Cập nhật địa chỉ tại vị trí index
+    storeInfo.addresses[index] = address;
+    
+    // Lưu thông tin cửa hàng với địa chỉ đã cập nhật
+    return this.storeInfoRepository.save(storeInfo);
+  }
+
+  // Phương thức xóa địa chỉ cửa hàng
+  async removeAddress(index: number): Promise<StoreInfo> {
+    const storeInfo = await this.findOne();
+    
+    // Kiểm tra xem index có hợp lệ không
+    if (!storeInfo.addresses || index < 0 || index >= storeInfo.addresses.length) {
+      throw new NotFoundException(`Address at index ${index} not found`);
+    }
+    
+    // Xóa địa chỉ tại vị trí index
+    storeInfo.addresses.splice(index, 1);
+    
+    // Lưu thông tin cửa hàng sau khi xóa địa chỉ
+    return this.storeInfoRepository.save(storeInfo);
   }
 }

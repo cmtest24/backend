@@ -9,6 +9,7 @@ import { Repository, DataSource } from 'typeorm';
 import { Order, OrderStatus } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { CreateGuestOrderDto } from './dto/create-guest-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { CartService } from '../cart/cart.service';
 import { ProductsService } from '../products/products.service';
@@ -176,10 +177,121 @@ export class OrdersService {
     
     return this.ordersRepository.save(order);
   }
+  
+  async cancelOrderNoAuth(id: string, reason?: string): Promise<Order> {
+    const order = await this.findOneAdmin(id);
+    
+    if (order.status !== OrderStatus.PENDING) {
+      throw new BadRequestException('Only pending orders can be cancelled');
+    }
+    
+    // Update order status
+    order.status = OrderStatus.CANCELLED;
+    order.cancelReason = reason || 'Cancelled by user';
+    
+    return this.ordersRepository.save(order);
+  }
 
   async findAll(): Promise<Order[]> {
     return this.ordersRepository.find({
       relations: ['user', 'items'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+  
+  async createGuestOrder(createGuestOrderDto: CreateGuestOrderDto): Promise<Order> {
+    // Start a transaction
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    
+    try {
+      let orderItems: OrderItem[] = [];
+      let subtotal = 0;
+      
+      // Process order items
+      for (const item of createGuestOrderDto.items) {
+        const product = await this.productsService.findOne(item.productId);
+        
+        // Ưu tiên sử dụng giá khuyến mãi nếu có, nếu không thì sử dụng giá gốc
+        const price = product.salePrice !== null && product.salePrice !== undefined ? product.salePrice : product.price;
+        
+        // Tính tổng tiền cho mỗi mục đơn hàng bằng cách nhân giá với số lượng
+        const itemSubtotal = price * item.quantity;
+        
+        const orderItem = this.orderItemsRepository.create({
+          productId: product.id,
+          productName: product.name,
+          price: price,
+          quantity: item.quantity,
+          subtotal: itemSubtotal,
+        });
+        
+        orderItems.push(orderItem);
+        subtotal += itemSubtotal; // Cộng vào tổng tiền đơn hàng
+      }
+      
+      // Không tính phí ship, chỉ tính tổng giá sản phẩm
+      const shippingFee = 0;
+      const total = subtotal;
+      
+      // Create the order
+      const order = this.ordersRepository.create({
+        isGuestOrder: true,
+        guestFullName: createGuestOrderDto.fullName,
+        guestPhoneNumber: createGuestOrderDto.phoneNumber,
+        guestEmail: '',
+        note: createGuestOrderDto.note,
+        status: OrderStatus.PENDING,
+        subtotal,
+        shippingFee,
+        discount: 0,
+        total,
+        shippingFullName: createGuestOrderDto.fullName,
+        shippingPhone: createGuestOrderDto.phoneNumber,
+        shippingAddress: createGuestOrderDto.address,
+        shippingWard: '',
+        shippingDistrict: '',
+        shippingCity: '',
+        shippingZipCode: '',
+      });
+      
+      const savedOrder = await this.ordersRepository.save(order);
+      
+      // Save order items and link to order
+      for (const orderItem of orderItems) {
+        orderItem.orderId = savedOrder.id;
+        await this.orderItemsRepository.save(orderItem);
+      }
+      
+      await queryRunner.commitTransaction();
+      
+      return this.findOneGuest(savedOrder.id);
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+  
+  async findOneGuest(id: string): Promise<Order> {
+    const order = await this.ordersRepository.findOne({
+      where: { id, isGuestOrder: true },
+      relations: ['items', 'items.product', 'payments'],
+    });
+
+    if (!order) {
+      throw new NotFoundException(`Order with ID ${id} not found`);
+    }
+
+    return order;
+  }
+  
+  async findAllGuestOrders(phoneNumber: string): Promise<Order[]> {
+    return this.ordersRepository.find({
+      where: { guestPhoneNumber: phoneNumber, isGuestOrder: true },
+      relations: ['items'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -217,6 +329,29 @@ export class OrdersService {
     order.status = updateStatusDto.status;
     
     return this.ordersRepository.save(order);
+  }
+  
+  async deleteOrder(id: string): Promise<void> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    
+    try {
+      const order = await this.findOneAdmin(id);
+      
+      // Delete order items first
+      await this.orderItemsRepository.delete({ orderId: id });
+      
+      // Then delete the order
+      await this.ordersRepository.delete(id);
+      
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
   
   private calculateShippingFee(subtotal: number): number {

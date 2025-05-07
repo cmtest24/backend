@@ -9,6 +9,15 @@ npm-debug.log*
 pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Image files in public
+public/**/*.jpg
+public/**/*.jpeg
+public/**/*.png
+public/**/*.gif
+public/**/*.svg
+public/**/*.webp
+public/**/*.ico
 lerna-debug.log*
 
 # OS

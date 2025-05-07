@@ -30,10 +30,10 @@ export class Product {
   @Column('text', { nullable: true })
   longDescription: string;
 
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column('integer', { nullable: true })
   price: number;
 
-  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  @Column('integer', { nullable: true })
   salePrice: number;
 
   @Column({ nullable: true })

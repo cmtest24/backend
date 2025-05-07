@@ -5,16 +5,12 @@ import {
   Body,
   Param,
   Delete,
-  UseGuards,
   Put,
+  HttpCode,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ContactService } from './contact.service';
 import { CreateContactDto } from './dto/create-contact.dto';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../common/guards/roles.guard';
-import { Roles } from '../../common/decorators/roles.decorator';
-import { Role } from '../../common/constants/role.enum';
 
 @ApiTags('contact')
 @Controller('contact')
@@ -29,33 +25,25 @@ export class ContactController {
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Get all contact submissions (admin only)' })
+  @ApiOperation({ summary: 'Get all contact submissions' })
   @ApiResponse({ status: 200, description: 'Return all contact submissions' })
-  @ApiBearerAuth()
   findAll() {
     return this.contactService.findAll();
   }
 
   @Put(':id/read')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Mark contact as read (admin only)' })
+  @ApiOperation({ summary: 'Mark contact as read' })
   @ApiResponse({ status: 200, description: 'Contact marked as read' })
   @ApiResponse({ status: 404, description: 'Contact not found' })
-  @ApiBearerAuth()
   markAsRead(@Param('id') id: string) {
     return this.contactService.markAsRead(id);
   }
   
+  
   @Put(':id/replied')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Mark contact as replied with notes (admin only)' })
+  @ApiOperation({ summary: 'Mark contact as replied with notes' })
   @ApiResponse({ status: 200, description: 'Contact marked as replied' })
   @ApiResponse({ status: 404, description: 'Contact not found' })
-  @ApiBearerAuth()
   markAsReplied(
     @Param('id') id: string,
     @Body('adminNotes') adminNotes: string,
@@ -64,12 +52,9 @@ export class ContactController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Delete a contact submission (admin only)' })
+  @ApiOperation({ summary: 'Delete a contact submission' })
   @ApiResponse({ status: 200, description: 'Contact deleted successfully' })
   @ApiResponse({ status: 404, description: 'Contact not found' })
-  @ApiBearerAuth()
   remove(@Param('id') id: string) {
     return this.contactService.delete(id);
   }

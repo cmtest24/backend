@@ -28,4 +28,7 @@ export class StoreInfo {
 
   @Column({ nullable: true })
   workingHours: string;
+
+  @Column({ type: 'jsonb', nullable: true, default: '[]' })
+  addresses: { name: string; phoneNumber: string; address: string }[];
 }

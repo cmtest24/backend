@@ -1,5 +1,6 @@
-import { IsOptional, IsString, IsUrl } from 'class-validator';
+import { IsOptional, IsString, IsUrl, IsArray, ValidateNested } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class CreateStoreInfoDto {
   @ApiPropertyOptional({ description: 'Store logo URL' })
@@ -45,4 +46,9 @@ export class CreateStoreInfoDto {
   @IsOptional()
   @IsString()
   workingHours?: string;
+
+  @ApiPropertyOptional({ description: 'Store addresses', type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, phoneNumber: { type: 'string' }, address: { type: 'string' } } } })
+  @IsOptional()
+  @IsArray()
+  addresses?: { name: string; phoneNumber: string; address: string }[];
 }

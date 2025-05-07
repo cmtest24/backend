@@ -21,7 +21,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ProductsModule } from './modules/products/products.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 // import { CartModule } from './modules/cart/cart.module';
-// import { OrdersModule } from './modules/orders/orders.module';
+import { OrdersModule } from './modules/orders/orders.module';
 // import { PaymentsModule } from './modules/payments/payments.module';
 // import { ReviewsModule } from './modules/reviews/reviews.module';
 import { PostsModule } from './modules/posts/posts.module';
@@ -77,7 +77,7 @@ import { TeamModule } from './modules/team/team.module';
     // AddressesModule,
     // WishlistModule,
     // CartModule,
-    // OrdersModule,
+    OrdersModule,
     // PaymentsModule,
     // ReviewsModule,
     // PromotionsModule,
@@ -117,7 +117,7 @@ import { TeamModule } from './modules/team/team.module';
     // ProductsModule,
     // CategoriesModule,
     // CartModule,
-    // OrdersModule,
+    OrdersModule,
     // PaymentsModule,
     // ReviewsModule,
     PostsModule,

@@ -51,13 +51,13 @@ export class PostsController {
     return this.postsService.findAll(search, tag, limit, page);
   }
 
-  @Get(':slug')
+  @Get(':id')
   @UseInterceptors(CacheInterceptor)
-  @ApiOperation({ summary: 'Get a blog post by slug' })
+  @ApiOperation({ summary: 'Get a blog post by ID' })
   @ApiResponse({ status: 200, description: 'Return the post' })
   @ApiResponse({ status: 404, description: 'Post not found' })
-  findBySlug(@Param('slug') slug: string) {
-    return this.postsService.findBySlug(slug);
+  findOne(@Param('id') id: string) {
+    return this.postsService.findOne(id);
   }
 
   @Put(':id')

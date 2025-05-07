@@ -25,8 +25,20 @@ export class Order {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ nullable: true })
   userId: string;
+  
+  @Column({ nullable: true })
+  guestEmail: string;
+  
+  @Column({ nullable: true })
+  guestPhoneNumber: string;
+  
+  @Column({ nullable: true })
+  guestFullName: string;
+  
+  @Column({ default: false })
+  isGuestOrder: boolean;
 
   @Column({
     type: 'enum',
@@ -80,7 +92,7 @@ export class Order {
   @Column({ nullable: true })
   cancelReason: string;
 
-  @ManyToOne(() => User, (user) => user.orders)
+  @ManyToOne(() => User, (user) => user.orders, { nullable: true })
   @JoinColumn({ name: 'userId' })
   user: User;
 
